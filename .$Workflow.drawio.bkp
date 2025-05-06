@@ -1,0 +1,16 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/26.2.2 Chrome/134.0.6998.178 Electron/35.1.2 Safari/537.36" version="26.2.2">
+  <diagram name="Page-1" id="3QP9msNEL1D2CF2Wyl5W">
+    <mxGraphModel dx="335" dy="-251" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="mtg0dPIvrmi-TNF6NY6Q-1" value="Alert system" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFF99;strokeColor=#36393d;strokeWidth=2;perimeterSpacing=2;fontFamily=Comic Sans MS;fontStyle=1;fontSize=15;arcSize=12;" vertex="1" parent="1">
+          <mxGeometry x="2106" y="2487" width="100" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="mtg0dPIvrmi-TNF6NY6Q-2" value="" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;fillOpacity=100;fillColor=none;strokeWidth=3;strokeColor=#009900;fontStyle=0" vertex="1" parent="1">
+          <mxGeometry x="1408" y="2140" width="188" height="193" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
