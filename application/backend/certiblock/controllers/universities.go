@@ -11,6 +11,7 @@ import (
 
 func UniversitiesAPI(context *base.ApplicationContext, r *gin.RouterGroup) {
 	r.POST("/certificate-file", AddCertificateFile(context))
+	r.POST("/register", RegisterUniversity(context))
 }
 
 // POST /api/universities/certificate-file
@@ -41,5 +42,29 @@ func AddCertificateFile(context *base.ApplicationContext) func(c *gin.Context) {
 			return
 		}
 		c.JSON(http.StatusCreated, gin.H{})
+	}
+}
+
+func RegisterUniversity(context *base.ApplicationContext) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		var UniversityInput data.UniversityInput
+
+		if err := c.ShouldBindJSON(&UniversityInput); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H {
+				"error": err.Error(),
+			})
+			return
+		}
+
+		university, err := universities.RegisterUniversity(context, &UniversityInput)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		
+		c.JSON(http.StatusCreated, university)
+
 	}
 }
