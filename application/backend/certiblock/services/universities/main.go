@@ -5,6 +5,7 @@ import (
 	"CertiBlock/application/backend/certiblock/base/data"
 	"CertiBlock/application/shared/utils"
 	"fmt"
+	"errors"
 )
 
 func SaveCertificateFile(context *base.ApplicationContext, fileUpload *data.CertificateFileUpload) (*string, error) {
@@ -28,4 +29,40 @@ func SaveCertificateFile(context *base.ApplicationContext, fileUpload *data.Cert
 	}
 
 	return nil, nil
+}
+
+
+func RegisterUniversity(context *base.ApplicationContext, UniversityInput *data.UniversityInput) (*data.UniversityOutput, error) {
+	privateKeyUniv := utils.HashSHA512(UniversityInput.Name+UniversityInput.Password+UniversityInput.Location+UniversityInput.Description)
+
+	publicKeyUniv, err := utils.ComputePublicKeyString(privateKeyUniv)
+	if err != nil {
+		return nil, fmt.Errorf("error computing public key of Univ: %w", err)
+	}
+
+	row := context.DB.QueryRow("SELECT public_key FROM universities WHERE public_key = ?", publicKeyUniv)
+	var existingPublicKey string
+	err = row.Scan(&existingPublicKey)
+	if err == nil {
+		return nil, errors.New("University already registered")
+	}
+
+
+	_, err = context.DB.Exec(
+		"INSERT INTO universities (name_university, public_key, private_key, location_university, description_university) VALUES (?, ?, ?, ?, ?)",
+		UniversityInput.Name,
+		publicKeyUniv,
+		privateKeyUniv,
+		UniversityInput.Location,
+		UniversityInput.Description,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error inserting university: %w", err)
+	}
+
+	return &data.UniversityOutput{
+		Name: UniversityInput.Name,
+		PrivateKey: privateKeyUniv,
+		PublicKey:  publicKeyUniv,
+	}, nil
 }
