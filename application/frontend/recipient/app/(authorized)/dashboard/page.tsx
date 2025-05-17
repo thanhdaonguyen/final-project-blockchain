@@ -251,8 +251,9 @@ const Dashboard: React.FC = () => {
             {true && (
                 <Modal
                     title="Share Certificate"
-                    // open={isModalOpen}
-                    open={true}
+                    open={isModalOpen}
+
+                    //open={true}
                     onOk={handleOk}
                     onCancel={handleCancel}
                     footer={[

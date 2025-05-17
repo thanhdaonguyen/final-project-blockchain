@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import logo from './assets/images/logo-universal.png';
 import './App.css';
-import { Connect, InitLedger, IssueCertificate, GetAll, RegisterUniversity} from '../wailsjs/go/main/App';
+import { Connect, InitLedger, IssueCertificate, GetAll} from '../wailsjs/go/main/App';
 
 function App() {
     const [resultText, setResultText] = useState("Click a button to interact with the blockchain 👇");
@@ -13,12 +13,12 @@ function App() {
         studentPK: '',
         backendServerUrl: '',
     });
-    const [univInputs, setUnivInputs] = useState({
-        name: '',
-        publicKey: '',
-        location: '',
-        description: '',
-    });
+    // const [univInputs, setUnivInputs] = useState({
+    //     name: '',
+    //     publicKey: '',
+    //     location: '',
+    //     description: '',
+    // });
     const [certificates, setCertificates] = useState([]);
 
     const handleConnect = () => {
@@ -81,23 +81,29 @@ function App() {
             .catch((err) => setResultText(`Error: ${err}`));
     };
 
-    const updateUnivInput = (e) => {
-        setUnivInputs({ ...univInputs, [e.target.name]: e.target.value });
-    };
+    // const updateUnivInput = (e) => {
+    //     setUnivInputs({ ...univInputs, [e.target.name]: e.target.value });
+    // };
 
-    const handleRegisterUniversity = (e) => {
-        e.preventDefault();
-        RegisterUniversity(
-            univInputs.name,
-            univInputs.publicKey,
-            univInputs.location,
-            univInputs.description
-        )
-            .then((result) => {
-                setResultText(result);
-            })
-            .catch((err) => setResultText(`Error: ${err}`));
-    };
+    // const handleRegisterUniversity = (e) => {
+    //     e.preventDefault();
+    //     RegisterUniversity(
+    //         univInputs.name,
+    //         univInputs.publicKey,
+    //         univInputs.location,
+    //         univInputs.description
+    //     )
+    //         .then((result) => {
+    //             setResultText(result);
+    //             setUnivInputs({
+    //                 name: '',
+    //                 publicKey: '',
+    //                 location: '',
+    //                 description: '',
+    //             });
+    //         })
+    //         .catch((err) => setResultText(`Error: ${err}`));
+    // };
 
     // // Hàm cắt ngắn nội dung dài
     const truncateText = (text, maxLength) => {
@@ -160,7 +166,7 @@ function App() {
 
             </div>
 
-            <div className="input-box">
+            {/*<div className="input-box">
                 <h3>Register University</h3>
                 <form onSubmit={handleRegisterUniversity}>
                     <input className="input" name="name" placeholder="University Name" value={univInputs.name} onChange={updateUnivInput} />
@@ -169,7 +175,7 @@ function App() {
                     <input className="input" name="description" placeholder="Description" value={univInputs.description} onChange={updateUnivInput} />
                     <button type="submit" className="btn">Register</button>
                 </form>
-            </div>
+            </div> */}
         </div>
     );
 }

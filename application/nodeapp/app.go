@@ -248,14 +248,14 @@ func (a *App) IssueCertificate(universitySignature, studentSignature, dateOfIssu
 	return fmt.Sprintf("Certificate issued successfully:\n%s\n\nUniversity Public Key:%s\n", result, universityPublicKeyString)
 }
 
-// RegisterUniversity registers a new university
-func (a *App) RegisterUniversity(name, publicKey, location, description string) string {
-	result, err := RegisterUniversity(a.contract, name, publicKey, location, description)
-	if err != nil {
-		return fmt.Sprintf("Error: Failed to register university: %v", err)
-	}
-	return fmt.Sprintf("University registered successfully:\n%s", result)
-}
+// // RegisterUniversity registers a new university
+// func (a *App) RegisterUniversity(name, publicKey, location, description string) string {
+// 	result, err := RegisterUniversity(a.contract, name, publicKey, location, description)
+// 	if err != nil {
+// 		return fmt.Sprintf("Error: Failed to register university: %v", err)
+// 	}
+// 	return fmt.Sprintf("University registered successfully:\n%s", result)
+// }
 
 // GetAll queries all certificates
 func (a *App) GetAll() string {

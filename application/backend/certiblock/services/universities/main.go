@@ -32,7 +32,7 @@ func SaveCertificateFile(context *base.ApplicationContext, fileUpload *data.Cert
 }
 
 
-func RegisterUniversity(context *base.ApplicationContext, UniversityInput *data.UniversityInput) (*data.UniversityOutput, error) {
+func SaveUniversity(context *base.ApplicationContext, UniversityInput *data.UniversityInput) (*data.UniversityOutput, error) {
 	privateKeyUniv := utils.HashSHA512(UniversityInput.Name+UniversityInput.Password+UniversityInput.Location+UniversityInput.Description)
 
 	publicKeyUniv, err := utils.ComputePublicKeyString(privateKeyUniv)

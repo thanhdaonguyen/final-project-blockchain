@@ -45,6 +45,16 @@ func AddCertificateFile(context *base.ApplicationContext) func(c *gin.Context) {
 	}
 }
 
+// POST /api/universities/register
+// @Tags universities
+// @Summary Register a university
+// @Description Register a university
+// @Accept json
+// @Produce json
+// @Param university body data.UniversityInput true "University registration data"
+// @Success 201 {object} data.UniversityOutput
+// @Failure 400 {object} gin.H
+// @Router /api/universities/register [post]
 func RegisterUniversity(context *base.ApplicationContext) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		var UniversityInput data.UniversityInput
@@ -56,7 +66,7 @@ func RegisterUniversity(context *base.ApplicationContext) func(c *gin.Context) {
 			return
 		}
 
-		university, err := universities.RegisterUniversity(context, &UniversityInput)
+		university, err := universities.SaveUniversity(context, &UniversityInput)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),

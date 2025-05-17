@@ -372,6 +372,46 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/universities/register": {
+            "post": {
+                "description": "Register a university",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "universities"
+                ],
+                "summary": "Register a university",
+                "parameters": [
+                    {
+                        "description": "University registration data",
+                        "name": "university",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/data.UniversityInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/data.UniversityOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -506,6 +546,37 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "fullName": {
+                    "type": "string"
+                },
+                "privateKey": {
+                    "type": "string"
+                },
+                "publicKey": {
+                    "type": "string"
+                }
+            }
+        },
+        "data.UniversityInput": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "data.UniversityOutput": {
+            "type": "object",
+            "properties": {
+                "name": {
                     "type": "string"
                 },
                 "privateKey": {

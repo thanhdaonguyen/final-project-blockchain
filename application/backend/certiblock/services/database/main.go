@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"slices"
+	// "path/filepath"
 
 	"github.com/go-sql-driver/mysql"
 )
@@ -39,6 +40,14 @@ func migrate(context *base.ApplicationContext) error {
 
 	fmt.Println("Migrator: Migrating database...")
 
+	// basePath, _ := os.Getwd()
+	// migrationDir := filepath.Join(basePath, "../backend/certiblock/services/database/migrations")
+	// migrationFiles, err := os.ReadDir(migrationDir)
+
+	// if err != nil {
+	// 	return err
+	// }
+
 	migrationFiles, err := os.ReadDir("services/database/migrations")
 	if err != nil {
 		return err
@@ -69,6 +78,8 @@ func migrate(context *base.ApplicationContext) error {
 		if count == 0 {
 			// APPLY MIGRATION
 			// read sql file
+			// sqlFilePath := filepath.Join(migrationDir, migrationFileName)
+
 			sqlFilePath := "services/database/migrations/" + migrationFileName
 			sqlFile, err := os.ReadFile(sqlFilePath)
 			if err != nil {
