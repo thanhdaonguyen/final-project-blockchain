@@ -407,25 +407,16 @@
         "data.CertificateFileUpload": {
             "type": "object",
             "properties": {
-                "certUUID": {
+                "encodedFile": {
                     "type": "string"
                 },
-                "ksEncryptedFile": {
+                "issueCertificate": {
                     "type": "string"
                 },
-                "studentEncryptedKS1": {
+                "studentPublicKey": {
                     "type": "string"
                 },
-                "studentEncryptedKS2": {
-                    "type": "string"
-                },
-                "universityEncryptedKS1": {
-                    "type": "string"
-                },
-                "universityEncryptedKS2": {
-                    "type": "string"
-                },
-                "universityPrivateKey": {
+                "universityName": {
                     "type": "string"
                 }
             }
