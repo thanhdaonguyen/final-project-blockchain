@@ -22,10 +22,6 @@ export function IssueCertificate(arg1, arg2, arg3, arg4, arg5, arg6) {
   return window['go']['main']['App']['IssueCertificate'](arg1, arg2, arg3, arg4, arg5, arg6);
 }
 
-export function RegisterUniversity(arg1, arg2, arg3, arg4) {
-  return window['go']['main']['App']['RegisterUniversity'](arg1, arg2, arg3, arg4);
-}
-
 export function Shutdown() {
   return window['go']['main']['App']['Shutdown']();
 }

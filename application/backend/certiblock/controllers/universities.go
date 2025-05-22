@@ -66,7 +66,7 @@ func RegisterUniversity(context *base.ApplicationContext) func(c *gin.Context) {
 			return
 		}
 
-		university, err := universities.RegisterUniversity(context, &UniversityInput)
+		university, err := universities.SaveUniversity(context, &UniversityInput)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),
