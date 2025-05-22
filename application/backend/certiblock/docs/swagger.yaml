@@ -90,6 +90,26 @@ definitions:
       publicKey:
         type: string
     type: object
+  data.UniversityInput:
+    properties:
+      description:
+        type: string
+      location:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    type: object
+  data.UniversityOutput:
+    properties:
+      name:
+        type: string
+      privateKey:
+        type: string
+      publicKey:
+        type: string
+    type: object
   gin.H:
     additionalProperties: {}
     type: object
@@ -328,6 +348,32 @@ paths:
           schema:
             $ref: '#/definitions/gin.H'
       summary: Add a certificate file
+      tags:
+      - universities
+  /api/universities/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a university
+      parameters:
+      - description: University registration data
+        in: body
+        name: university
+        required: true
+        schema:
+          $ref: '#/definitions/data.UniversityInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/data.UniversityOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Register a university
       tags:
       - universities
 swagger: "2.0"

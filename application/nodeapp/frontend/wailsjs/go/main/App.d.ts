@@ -11,6 +11,4 @@ export function InitLedger():Promise<string>;
 
 export function IssueCertificate(arg1:string,arg2:string,arg3:string,arg4:string,arg5:string,arg6:string):Promise<string>;
 
-export function RegisterUniversity(arg1:string,arg2:string,arg3:string,arg4:string):Promise<string>;
-
 export function Shutdown():Promise<string>;
