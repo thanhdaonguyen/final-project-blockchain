@@ -1,21 +1,16 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   Button,
-  DatePicker,
   Form,
   FormProps,
   Input,
   notification,
-  Select,
   Typography,
 } from 'antd';
 import Link from 'next/link';
 import { BACKEND_URL } from '@/utils/env';
-import { useAuth } from '@/components/AuthProvider';
-import { getCountries } from '@/utils/getCountries';
 import { useRouter } from 'next/navigation';
-
 
 const { Title, Text } = Typography;
 
@@ -44,11 +39,9 @@ const tailFormItemLayout = {
 };
 
 type FieldType = {
-  countryID?: number;
-  NIN?: string;
-  fullName?: string;
-  dateOfBirth?: string;
+  nameUniversity?: string;
   password?: string;
+  location?: string;
 };
 
 const storeLoginData = (data: any) => {
@@ -67,11 +60,9 @@ const Register: React.FC = () => {
   const [form] = Form.useForm();
   const router = useRouter();
 
-  // const { setAuth } = useAuth();
-
   const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
-    const res = await fetch(`${BACKEND_URL}/api/students`, {
-      mode: 'no-cors',
+    console.log('BACKEND_URL =', BACKEND_URL);
+    const res = await fetch(`${BACKEND_URL}/api/universities/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -84,38 +75,20 @@ const Register: React.FC = () => {
       return;
     }
     storeLoginData({
-      isAuthenticated: true,
+      isAuthenticated : true,
       privateKey: data.privateKey,
       publicKey: data.publicKey,
-      fullName: data.fullName,
+      universityName: data.nameUniversity,
     })
-    // setAuth({
-    //   isAuthenticated: true,
-    //   privateKey: data.privateKey,
-    //   publicKey: data.publicKey,
-    //   fullName: data.fullName,
-    // });
-    notification.success({ message: 'Success', description: 'You have successfully registered! Redirect to Homepage.' });
-    router.push("/home"); 
+    notification.success({ message: 'Success', description: 'You have successfully register university! Redirect to Homepage'});
+    console.log("Redirecting to /home...");
+    console.log('Current location:', window.location.href);
+    router.push("/home");
   };
 
   const onFinishFailed: FormProps<FieldType>['onFinishFailed'] = (errorInfo) => {
     console.log('Failed:', errorInfo);
   };
-
-  const [countries, setCountries] = useState<{ value: number, label: string }[]>([]);
-
-  useEffect(() => {
-    getCountries().then(data => {
-      setCountries(data.map(c => {
-        return {
-          value: c.id,
-          label: c.name,
-        };
-      }));
-    });
-  }, []);
-
 
   return (
     <div style={{ padding: '40px 0', backgroundColor: '#f9f9f9' }}>
@@ -132,21 +105,12 @@ const Register: React.FC = () => {
           scrollToFirstError
         >
           <Form.Item
-            name="countryID"
-            label="Country"
-            rules={[{ required: true, message: 'Please select your country!' }]}
-          >
-            <Select options={countries} />
-          </Form.Item>
-
-          <Form.Item
-            name="NIN"
-            label="National Id Number (NIN)"
+            name="name"
+            label="University's Name"
             rules={[
               {
-                type: 'string',
                 required: true,
-                message: 'Please input your NIN!',
+                message: "Please input University Name",
               },
             ]}
           >
@@ -154,31 +118,16 @@ const Register: React.FC = () => {
           </Form.Item>
 
           <Form.Item
-            name="fullName"
-            label="Full Name"
+            name="location"
+            label="Location"
             rules={[
               {
-                type: 'string',
                 required: true,
-                message: 'Please input your full name!',
+                message: 'Please input your location!',
               },
             ]}
           >
             <Input />
-          </Form.Item>
-
-          <Form.Item
-            name="dateOfBirth"
-            label="Date of Birth"
-            rules={[
-              {
-                type: 'date',
-                required: true,
-                message: 'Please input your date of birth!',
-              },
-            ]}
-          >
-            <DatePicker />
           </Form.Item>
 
           <Form.Item
@@ -223,13 +172,12 @@ const Register: React.FC = () => {
               Register
             </Button>
           </Form.Item>
-
-          <Text>
-            You already have account?
-            <Link href="/login" passHref>
-              Login
+            <Text>
+            You already have account? 
+            <Link href="/register" passHref>
+            Login
             </Link>
-          </Text>
+        </Text>
         </Form>
       </div>
     </div>

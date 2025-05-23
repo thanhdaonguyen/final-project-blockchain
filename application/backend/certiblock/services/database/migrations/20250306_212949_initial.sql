@@ -36,6 +36,19 @@ CREATE TABLE IF NOT EXISTS certificates (
     KEY idx_cert_uuid (uuid(16))
 );
 
+CREATE TABLE IF NOT EXISTS certificates2 (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    uuid TEXT NOT NULL,
+    university_encrypted_ks_1 LONGTEXT NOT NULL,
+    university_encrypted_ks_2 LONGTEXT NOT NULL,
+    student_encrypted_ks_1 LONGTEXT NOT NULL,
+    student_encrypted_ks_2 LONGTEXT NOT NULL,
+    ks_encrypted_file LONGTEXT NOT NULL,
+    is_On_Chain BOOLEAN NOT NULL DEFAULT FALSE, 
+
+    KEY idx_cert_uuid (uuid(16))
+);
+
 CREATE TABLE IF NOT EXISTS qrs (
     id INT PRIMARY KEY AUTO_INCREMENT,
     cert_uuid TEXT NOT NULL,

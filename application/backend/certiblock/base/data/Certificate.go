@@ -28,6 +28,6 @@ type BlockchainCertificateOutput struct {
 type CertificateFileUpload struct {
 	StudentPublicKey               string `json:"studentPublicKey"`
 	UniversityName   string `json:"universityName"`
-	IssueCertificate string `json:"issueCertificate"`
+	DateOfIssuing string `json:"dateOfIssuing"`
 	EncodedFile        string `json:"encodedFile"`
 }
