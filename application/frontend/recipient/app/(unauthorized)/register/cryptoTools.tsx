@@ -161,26 +161,3 @@ export async function verifySignature(
         return false;
     }
 }
-
-(async () => {
-    // Generate a key pair
-    let { privateKey, publicKey } = await generateKey();
-
-    // Export keys to strings
-    let privateKeyString = await exportKeyToString(privateKey!);
-    let publicKeyString = await exportKeyToString(publicKey!);
-
-    privateKey = await importKeyFromString(privateKeyString!, ["sign"]);
-    publicKey = await importKeyFromString(publicKeyString!, ["verify"]);
-
-    // Data to sign
-    const data = "Hello, world!";
-
-    // Sign the data
-    const signature = await signData(privateKeyString!, data);
-    console.log("Signature:", signature);
-
-    // Verify the signature
-    const isValid = await verifySignature(publicKeyString!, signature!, data);
-    console.log("Is signature valid?", isValid);
-})();

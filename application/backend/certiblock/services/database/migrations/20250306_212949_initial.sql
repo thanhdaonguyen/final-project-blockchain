@@ -3,11 +3,16 @@ CREATE TABLE IF NOT EXISTS countries (
     name VARCHAR(255) NOT NULL
 );
 
+
 CREATE TABLE IF NOT EXISTS students (
     id INT PRIMARY KEY AUTO_INCREMENT,
+    nin TEXT NOT NULL,
+    country_id INT NOT NULL,
+    date_of_birth TEXT NOT NULL,
+    full_name TEXT NOT NULL,
+    password TEXT NOT NULL,
+    private_key TEXT NOT NULL,
     public_key TEXT NOT NULL,
-    encrypted_partial_personal_info_1 LONGTEXT NOT NULL,
-    encrypted_partial_personal_info_2 LONGTEXT NOT NULL,
 
     KEY idx_student_pubkey (public_key(16))
 );

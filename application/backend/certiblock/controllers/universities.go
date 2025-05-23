@@ -5,6 +5,7 @@ import (
 	"CertiBlock/application/backend/certiblock/base/data"
 	"CertiBlock/application/backend/certiblock/services/universities"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,6 +13,8 @@ import (
 func UniversitiesAPI(context *base.ApplicationContext, r *gin.RouterGroup) {
 	r.POST("/certificate-file", AddCertificateFile(context))
 	r.POST("/register", RegisterUniversity(context))
+	r.GET("", GetUniversities(context))
+	r.GET("/:id", GetUniversityById(context))
 }
 
 // POST /api/universities/certificate-file
@@ -76,5 +79,61 @@ func RegisterUniversity(context *base.ApplicationContext) func(c *gin.Context) {
 		
 		c.JSON(http.StatusCreated, university)
 
+	}
+}
+
+
+// GET /api/universities
+// @Tags universities
+// @Summary Get all universities
+// @Description Get all universities
+// @Produce json
+// @Success 200 {array} data.University
+// @Failure 500 {object} gin.H
+// @Router /api/universities [get]
+func GetUniversities(context *base.ApplicationContext) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		universities, err := universities.GetAll(context)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, universities)
+	}
+}
+
+// GetUniversityById handles GET /api/universities/:id
+// @Tags universities
+// @Summary Get a university by ID
+// @Description Retrieve a university by its unique ID
+// @Produce json
+// @Param id path int true "University ID"
+// @Success 200 {object} data.University
+// @Failure 400 {object} gin.H
+// @Failure 404 {object} gin.H
+// @Router /api/universities/{id} [get]
+func GetUniversityById(context *base.ApplicationContext) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		ID, err := strconv.Atoi(id)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "Invalid ID",
+			})
+			return
+		}
+
+		university, err := universities.GetById(context, ID)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "University not found",
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, university)
 	}
 }

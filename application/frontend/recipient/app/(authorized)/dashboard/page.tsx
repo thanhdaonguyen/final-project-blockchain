@@ -33,6 +33,7 @@ const Dashboard: React.FC = () => {
     // Safely retrieve login data from localStorage on the client side
     useEffect(() => {
         const stringLoginData = localStorage.getItem("loginData");
+        console.log(stringLoginData);
         if (stringLoginData) {
             setLoginData(JSON.parse(stringLoginData));
         } else {
@@ -214,6 +215,13 @@ const Dashboard: React.FC = () => {
                 {"Public Key: " +
                     (loginData.isAuthenticated
                         ? loginData.publicKey
+                        : "Unauthorized")}
+            </Title>
+
+            <Title level={4}>
+                {"Private Key: " +
+                    (loginData.isAuthenticated
+                        ? loginData.privateKey
                         : "Unauthorized")}
             </Title>
 
