@@ -16,42 +16,21 @@ func SaveCertificateFile(context *base.ApplicationContext, fileUpload *data.Cert
 		fileUpload.UniversityName,
 	).Scan(&universityPublicKey)
 	if err != nil {
-		return nil, fmt.Errorf("error computing public key: %w", err)
+		return nil, fmt.Errorf("error finding public key: %w", err)
 	}
 
 	certUUID := uuid.NewString();
 
-	ks := utils.GenerateSecureRandomString(64)
-
-	studentEncryptedKS1, studentEncryptedKS2, err := utils.ElGamalEncryptString(fileUpload.StudentPublicKey, ks)
-	if err != nil {
-		return nil, fmt.Errorf("failed to encrypt KS using student public key: %w", err)
-	}
-	
-	universityEncryptedKS1, universityEncryptedKS2, err := utils.ElGamalEncryptString(universityPublicKey, ks)
-	if err != nil {
-		return nil, fmt.Errorf("failed to encrypt KS using university public key: %w", err)
-	}
-	
-	ksEncryptedFile, err := utils.VigenereEncryptString(ks, fileUpload.EncodedFile)
-	if err != nil {
-		return nil, errors.New("failed to encrypt file using KS")
-	}
-
-	encryptedFileSize := len(ksEncryptedFile)
-	fmt.Printf("Encrypted file size: %d\n", encryptedFileSize)
-	if encryptedFileSize > 66386403 {
-		return nil, errors.New("file too large. Maximum size is about 26MB (MySQL limitation)")
-	}
+	isOnChain := false
 
 	_, err = context.DB.Exec(
-		"INSERT INTO certificates (uuid, university_encrypted_ks_1, university_encrypted_ks_2, student_encrypted_ks_1, student_encrypted_ks_2, ks_encrypted_file) VALUES (?, ?, ?, ?, ?, ?)",
+		"INSERT INTO certificates2 (uuid, student_public_key, university_name, university_public_key, plain_text_file_data, is_on_chain) VALUES (?, ?, ?, ?, ?, ?)",
 		certUUID,
-		universityEncryptedKS1,
-		universityEncryptedKS2,
-		studentEncryptedKS1,
-		studentEncryptedKS2,
-		ksEncryptedFile,
+		fileUpload.StudentPublicKey,
+		fileUpload.UniversityName,
+		universityPublicKey,
+		fileUpload.EncodedFile,
+		isOnChain,
 	)
 
 	if err != nil {
@@ -61,9 +40,85 @@ func SaveCertificateFile(context *base.ApplicationContext, fileUpload *data.Cert
 	return nil, nil
 }
 
+func GetCertificatesOnChain(context *base.ApplicationContext) ([]data.CertificateFileOutput, error) {
+
+	query := `
+	SELECT uuid, student_public_key, university_name, university_public_key, plain_text_file_data, is_on_chain
+	FROM certificates2
+	WHERE is_on_chain = 1
+	`
+
+	rows, err := context.DB.Query(query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query certificates: %w", err)
+	}
+	defer rows.Close()
+
+	var results []data.CertificateFileOutput
+	for rows.Next() {
+		var cert data.CertificateFileOutput
+		err := rows.Scan(
+			&cert.CertUUID,
+			&cert.StudentPublicKey,
+			&cert.UniversityName,
+			&cert.UniversityPublicKey,
+			&cert.PlantextFileData,
+			&cert.IsOnChain,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+
+		results = append(results, cert)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows error: %w", err)
+	}
+	return results, nil
+
+}
+
+func GetCertificatesNotOnChain(context *base.ApplicationContext) ([]data.CertificateFileOutput, error) {
+	query := `
+	SELECT uuid, student_public_key, university_name, university_public_key, plain_text_file_data, is_on_chain
+	FROM certificates2
+	WHERE is_on_chain = 0
+	`
+
+	rows, err := context.DB.Query(query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query certificates: %w", err)
+	}
+	defer rows.Close()
+
+	var results []data.CertificateFileOutput
+	for rows.Next() {
+		var cert data.CertificateFileOutput
+		err := rows.Scan(
+			&cert.CertUUID,
+			&cert.StudentPublicKey,
+			&cert.UniversityName,
+			&cert.UniversityPublicKey,
+			&cert.PlantextFileData,
+			&cert.IsOnChain,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+
+		results = append(results, cert)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows error: %w", err)
+	}
+	return results, nil
+	
+}
 
 func SaveUniversity(context *base.ApplicationContext, UniversityInput *data.UniversityInput) (*data.UniversityOutput, error) {
-	privateKeyUniv := utils.HashSHA512(UniversityInput.Name+UniversityInput.Password+UniversityInput.Location+UniversityInput.Description)
+	privateKeyUniv := utils.HashSHA512(UniversityInput.Name+UniversityInput.Password+UniversityInput.Location)
 
 	publicKeyUniv, err := utils.ComputePublicKeyString(privateKeyUniv)
 	if err != nil {
@@ -79,12 +134,11 @@ func SaveUniversity(context *base.ApplicationContext, UniversityInput *data.Univ
 
 
 	_, err = context.DB.Exec(
-		"INSERT INTO universities (name_university, public_key, private_key, location_university, description_university) VALUES (?, ?, ?, ?, ?)",
+		"INSERT INTO universities (name_university, public_key, private_key, location_university) VALUES (?, ?, ?, ?)",
 		UniversityInput.Name,
 		publicKeyUniv,
 		privateKeyUniv,
 		UniversityInput.Location,
-		UniversityInput.Description,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("error inserting university: %w", err)

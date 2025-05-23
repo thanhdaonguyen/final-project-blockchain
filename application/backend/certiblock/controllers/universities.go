@@ -13,6 +13,8 @@ import (
 func UniversitiesAPI(context *base.ApplicationContext, r *gin.RouterGroup) {
 	r.POST("/certificate-file", AddCertificateFile(context))
 	r.POST("/register", RegisterUniversity(context))
+	r.GET("/certificates/on_chain", GetCertificatesOnChain(context))
+	r.GET("/certificates/not_on_chain", GetCertificatesNotOnChain(context))
 	r.GET("", GetUniversities(context))
 	r.GET("/:id", GetUniversityById(context))
 }
@@ -82,6 +84,42 @@ func RegisterUniversity(context *base.ApplicationContext) func(c *gin.Context) {
 	}
 }
 
+
+// GetCertificatesOnChain godoc
+// @Tags Certificates
+// @Summary Lấy danh sách certificate đã được đưa lên blockchain
+// @Description Trả về các chứng chỉ đã được đưa lên blockchain bởi các trường đại học
+// @Produce json
+// @Success 200 {array} data.CertificateFileOutput
+// @Failure 500 {object} gin.H
+// @Router /api/universities/certificates/on_chain [get]
+func GetCertificatesOnChain(context *base.ApplicationContext) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		certs, err := universities.GetCertificatesOnChain(context)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, certs)
+	}
+}
+
+// GetCertificatesNotOnChain godoc
+// @Tags Certificates
+// @Summary Lấy danh sách certificate chưa được đưa lên blockchain
+// @Description Trả về các chứng chỉ chưa được đưa lên blockchain bởi các trường đại học
+// @Produce json
+// @Success 200 {array} data.CertificateFileOutput
+// @Failure 500 {object} gin.H
+// @Router /api/universities/certificates/not_on_chain [get]
+func GetCertificatesNotOnChain(context *base.ApplicationContext) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		certs, err := universities.GetCertificatesNotOnChain(context)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, certs)
 
 // GET /api/universities
 // @Tags universities

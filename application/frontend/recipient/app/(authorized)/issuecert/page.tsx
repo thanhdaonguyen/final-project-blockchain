@@ -167,6 +167,7 @@ const IssueCertificate: React.FC = () => {
             return;
         }
 
+
         const requestBody = {
             certUUID: newCertUUID,
             universityName: universityName,

@@ -23,7 +23,6 @@ CREATE TABLE IF NOT EXISTS universities(
     public_key LONGTEXT NOT NULL,
     private_key LONGTEXT NOT NULL,
     location_university LONGTEXT NOT NULL,
-    description_university LONGTEXT NOT NULL,
 
     KEY idx_university_pubkey (public_key(16))
 
@@ -44,12 +43,14 @@ CREATE TABLE IF NOT EXISTS certificates (
 CREATE TABLE IF NOT EXISTS certificates2 (
     id INT PRIMARY KEY AUTO_INCREMENT,
     uuid TEXT NOT NULL,
-    university_encrypted_ks_1 LONGTEXT NOT NULL,
-    university_encrypted_ks_2 LONGTEXT NOT NULL,
-    student_encrypted_ks_1 LONGTEXT NOT NULL,
-    student_encrypted_ks_2 LONGTEXT NOT NULL,
-    ks_encrypted_file LONGTEXT NOT NULL,
-    is_On_Chain BOOLEAN NOT NULL DEFAULT FALSE, 
+    student_public_key LONGTEXT NOT NULL,
+    university_name LONGTEXT NOT NULL,
+    university_public_key LONGTEXT NOT NULL,
+    date_of_issue TEXT NOT NULL,
+    student_signature LONGTEXT NOT NULL,
+    university_signature LONGTEXT NOT NULL,
+    plain_text_file_data LONGTEXT NOT NULL,
+    is_on_chain BOOLEAN NOT NULL DEFAULT FALSE, 
 
     KEY idx_cert_uuid (uuid(16))
 );

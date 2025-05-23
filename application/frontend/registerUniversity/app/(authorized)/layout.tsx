@@ -28,24 +28,18 @@ export default function DashboardLayout({
         items={[
           {
             key: '1',
-            icon: <HomeOutlined />,
-            label: 'Home',
-            onClick: () => router.push('/home')
-          },
-          {
-            key: '2',
             icon: <DashboardOutlined />,
             label: 'Dashboard',
             onClick: () => router.push('/dashboard')
           },
           {
-            key: '3',
-            icon: <FileSearchOutlined />,
-            label: 'Issue Certificate',
-            onClick: () => router.push('/issue')
+            key: '2',
+            icon: <DashboardOutlined />,
+            label: 'Approve',
+            onClick: () => router.push('/approve')
           },
           {
-            key: '4',
+            key: '3',
             icon: <UserOutlined />,
             label: 'Account',
             onClick: () => router.push('/account')

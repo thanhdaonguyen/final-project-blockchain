@@ -391,6 +391,64 @@
                 }
             }
         },
+        "/api/universities/certificates/not_on_chain": {
+            "get": {
+                "description": "Trả về các chứng chỉ chưa được đưa lên blockchain bởi các trường đại học",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Certificates"
+                ],
+                "summary": "Lấy danh sách certificate chưa được đưa lên blockchain",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/data.CertificateFileOutput"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/universities/certificates/on_chain": {
+            "get": {
+                "description": "Trả về các chứng chỉ đã được đưa lên blockchain bởi các trường đại học",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Certificates"
+                ],
+                "summary": "Lấy danh sách certificate đã được đưa lên blockchain",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/data.CertificateFileOutput"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    }
+                }
+            }
+        },
         "/api/universities/register": {
             "post": {
                 "description": "Register a university",
@@ -474,6 +532,29 @@
         }
     },
     "definitions": {
+        "data.CertificateFileOutput": {
+            "type": "object",
+            "properties": {
+                "cert_uuid": {
+                    "type": "string"
+                },
+                "is_on_chain": {
+                    "type": "boolean"
+                },
+                "plain_text_file_data": {
+                    "type": "string"
+                },
+                "student_public_key": {
+                    "type": "string"
+                },
+                "universityPublicKey": {
+                    "type": "string"
+                },
+                "university_name": {
+                    "type": "string"
+                }
+            }
+        },
         "data.CertificateFileUpload": {
             "type": "object",
             "properties": {
@@ -626,9 +707,6 @@
         "data.UniversityInput": {
             "type": "object",
             "properties": {
-                "description": {
-                    "type": "string"
-                },
                 "location": {
                     "type": "string"
                 },
