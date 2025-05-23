@@ -57,12 +57,15 @@ const IssueCertificate: React.FC = () => {
           
             if (typeof result === 'string') {
               const base64String = result.split(',')[1];
+              console.log('Base64 String: ', base64String);
+              const decoded = atob(base64String);
+              console.log('📄 Decoded content:', JSON.stringify(decoded));
           
               const requestBody = {
                 studentPublicKey: newCertificate.studentPK,
                 universityName: newCertificate.universityName,
                 dateOfIssuing: newCertificate.issueDate,
-                encodedFile: base64String
+                encodedFile: decoded,
               };
           
               try {

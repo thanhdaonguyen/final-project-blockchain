@@ -1,4 +1,19 @@
 definitions:
+  data.CertificateFileOutput:
+    properties:
+      cert_uuid:
+        type: string
+      is_on_chain:
+        type: boolean
+      plain_text_file_data:
+        type: string
+      student_public_key:
+        type: string
+      university_name:
+        type: string
+      universityPublicKey:
+        type: string
+    type: object
   data.CertificateFileUpload:
     properties:
       dateOfIssuing:
@@ -86,8 +101,6 @@ definitions:
     type: object
   data.UniversityInput:
     properties:
-      description:
-        type: string
       location:
         type: string
       name:
@@ -344,6 +357,46 @@ paths:
       summary: Add a certificate file
       tags:
       - universities
+  /api/universities/certificates/not_on_chain:
+    get:
+      description: Trả về các chứng chỉ chưa được đưa lên blockchain bởi các trường
+        đại học
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/data.CertificateFileOutput'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Lấy danh sách certificate chưa được đưa lên blockchain
+      tags:
+      - Certificates
+  /api/universities/certificates/on_chain:
+    get:
+      description: Trả về các chứng chỉ đã được đưa lên blockchain bởi các trường
+        đại học
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/data.CertificateFileOutput'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Lấy danh sách certificate đã được đưa lên blockchain
+      tags:
+      - Certificates
   /api/universities/register:
     post:
       consumes:

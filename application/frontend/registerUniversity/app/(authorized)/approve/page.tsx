@@ -1,7 +1,6 @@
 // 'use client';
-// import React, { useEffect, useState } from 'react';
-// import { Button, Modal, QRCode, Table, Typography, Input, message } from 'antd';
-// import axios from 'axios';
+// import React, { useState } from 'react';
+// import { Button, Modal, QRCode, Table, Typography, Input } from 'antd';
 
 // const { Title, Text } = Typography;
 // const { Search } = Input;
@@ -19,22 +18,36 @@
 //   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 //   const [selectedCertificate, setSelectedCertificate] = useState<Certificate | null>(null);
 //   const [searchQuery, setSearchQuery] = useState<string>('');
-//   const [certificates, setCertificates] = useState<Certificate[]>([]);
 
-//   useEffect(() => {
-//     const fetchCertificates = async () => {
-//       try {
-//         const response = await axios.get('/api/certificates/on_chain');
-//         setCertificates(response.data);
-//       } catch (error) {
-//         message.error('Failed to fetch certificates');
-//         console.error(error);
-//       }
-//     };
+//   // Demo data for multiple certificates
+//   const certificates: Certificate[] = [
+//     {
+//       certificateId: '123456',
+//       recipientName: 'John Doe',
+//       issueDate: 'March 2025',
+//       validity: 'Lifetime',
+//     },
+//     {
+//       certificateId: '789012',
+//       recipientName: 'Emily Johnson',
+//       issueDate: 'January 2025',
+//       validity: 'Lifetime',
+//     },
+//     {
+//       certificateId: '345678',
+//       recipientName: 'Michael Brown',
+//       issueDate: 'July 2024',
+//       validity: '1 Year',
+//     },
+//     {
+//       certificateId: '901234',
+//       recipientName: 'Sophia Lee',
+//       issueDate: 'December 2024',
+//       validity: 'Lifetime',
+//     },
+//   ];
 
-//     fetchCertificates();
-//   }, []);
-
+//     // Columns definition for the Ant Design Table
 //     const columns = [
 //       {
 //         title: 'Certificate ID',
@@ -127,10 +140,12 @@
 
 // export default Dashboard;
 
+
 'use client';
 import React, { useEffect, useState } from 'react';
 import { Button, Modal, QRCode, Table, Typography, Input, message, Space, Tag } from 'antd';
 import { BACKEND_URL } from "@/utils/env";
+
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -150,11 +165,12 @@ const Dashboard: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [showTable, setShowTable] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchCertificates = async () => {
       try {
-        const res = await fetch(`${BACKEND_URL}/api/universities/certificates/on_chain`);
+        const res = await fetch(`${BACKEND_URL}/api/universities/certificates/not_on_chain`);
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
         setCertificates(data);
@@ -166,6 +182,32 @@ const Dashboard: React.FC = () => {
 
     fetchCertificates();
   }, []);
+
+  const handleApprove = async (certificate : Certificate) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/universities/certificates/appove`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ cert_uuid: certificate.cert_uuid }),
+      });
+
+      if (!response.ok) throw new Error('Approval failed');
+
+      message.success('Certificate approved and added to blockchain');
+
+      const res = await fetch(`${BACKEND_URL}/api/universities/certificates/not_on_chain`);
+      const data = await res.json();
+      setCertificates(data);
+    } catch (error) {
+      message.error('Failed to approve certificate');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const columns = [
     {
@@ -179,6 +221,18 @@ const Dashboard: React.FC = () => {
       key: 'university_name',
     },
     {
+      title: 'Student Public Key',
+      dataIndex: 'student_public_key',
+      key: 'student_public_key',
+      render: (text: string) => text.substring(0, 10) + '...', // Hiển thị rút gọn
+    },
+    {
+      title: 'Plain Text',
+      dataIndex: 'plain_text_file_data',
+      key: 'plain_text_file_data',
+      render: (text: string) => text.substring(0, 10) + '...', // Hiển thị rút gọn
+    },
+    {
       title: 'On Chain',
       dataIndex: 'is_on_chain',
       key: 'is_on_chain',
@@ -189,17 +243,16 @@ const Dashboard: React.FC = () => {
       ),
     },
     {
-      title: 'Student Public Key',
-      dataIndex: 'student_public_key',
-      key: 'student_public_key',
-      render: (text: string) => text.substring(0, 10) + '...', // Hiển thị rút gọn
-    },
-    {
       title: 'Action',
       key: 'action',
       render: (text: any, record: Certificate) => (
-        <Button type="primary" onClick={() => handleShare(record)}>
-          Share
+        <Button 
+          type="primary" 
+          onClick={() => handleApprove(record)}
+          disabled={record.is_on_chain}
+          loading={loading}
+        >
+          {record.is_on_chain ? 'Approved' : 'Approve'}
         </Button>
       ),
     },
@@ -231,7 +284,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <div style={{ padding: '20px' }}>
-      <Title level={2}>Certificates Issued</Title>
+      <Title level={2}>Certificates Pending Approval</Title>
 
       <Space style={{ marginBottom: 20 }}>
         <Button type="primary" onClick={toggleTable}>

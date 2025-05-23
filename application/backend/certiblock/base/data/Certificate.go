@@ -31,3 +31,12 @@ type CertificateFileUpload struct {
 	DateOfIssuing string `json:"dateOfIssuing"`
 	EncodedFile        string `json:"encodedFile"`
 }
+
+type CertificateFileOutput struct {
+	CertUUID            string `json:"cert_uuid"`
+	StudentPublicKey	string `json:"student_public_key"`
+	UniversityName		string `json:"university_name"`
+	UniversityPublicKey string `json:"university_public_key`
+	PlantextFileData	string `json:"plain_text_file_data"`
+	IsOnChain           bool   `json:"is_on_chain"`
+}

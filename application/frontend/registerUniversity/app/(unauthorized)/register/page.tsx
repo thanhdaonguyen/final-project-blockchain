@@ -83,7 +83,7 @@ const Register: React.FC = () => {
     notification.success({ message: 'Success', description: 'You have successfully register university! Redirect to Homepage'});
     console.log("Redirecting to /home...");
     console.log('Current location:', window.location.href);
-    router.push("/home");
+    router.push("/dashboard");
   };
 
   const onFinishFailed: FormProps<FieldType>['onFinishFailed'] = (errorInfo) => {
