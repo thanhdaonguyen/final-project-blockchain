@@ -418,10 +418,10 @@ const docTemplate = `{
         "data.CertificateFileUpload": {
             "type": "object",
             "properties": {
-                "encodedFile": {
+                "dateOfIssuing": {
                     "type": "string"
                 },
-                "issueCertificate": {
+                "encodedFile": {
                     "type": "string"
                 },
                 "studentPublicKey": {

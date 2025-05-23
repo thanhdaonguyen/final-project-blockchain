@@ -1,9 +1,9 @@
 definitions:
   data.CertificateFileUpload:
     properties:
-      encodedFile:
+      dateOfIssuing:
         type: string
-      issueCertificate:
+      encodedFile:
         type: string
       studentPublicKey:
         type: string
