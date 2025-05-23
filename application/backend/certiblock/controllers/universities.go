@@ -209,3 +209,34 @@ func GetUniversityById(context *base.ApplicationContext) func(c *gin.Context) {
 		c.JSON(http.StatusOK, university)
 	}
 }
+
+
+// ApproveCertificate godoc
+// @Tags Certificates
+// @Summary Duyệt certificate lên blockchain
+// @Description Duyệt một chứng chỉ và đưa lên blockchain
+// @Accept json
+// @Produce json
+// @Param input body data.BlockchainCertificateOutput true "Thông tin duyệt certificate"
+// @Success 200 {object} gin.H
+// @Failure 400 {object} gin.H
+// @Failure 404 {object} gin.H
+// @Failure 500 {object} gin.H
+// @Router /api/universities/certificates/approve [post]
+func ApproveCertificate(context *base.ApplicationContext) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		var req data.BlockchainCertificateOutput
+
+		if err := c.ShouldBindJSON(&req); err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{
+                "error": "Invalid request body",
+                "details": err.Error(),
+            })
+            return
+        }
+
+		
+
+
+	}
+}

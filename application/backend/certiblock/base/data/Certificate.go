@@ -46,3 +46,7 @@ type CertificateFileOutput struct {
 	PlantextFileData	string `json:"plain_text_file_data"`
 	IsOnChain           bool   `json:"is_on_chain"`
 }
+
+type CertificateApprovalRequest struct {
+    CertUUID string `json:"cert_uuid" binding:"required"`
+}

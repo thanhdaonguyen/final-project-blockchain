@@ -4,6 +4,7 @@ import (
 	"CertiBlock/application/backend/certiblock/base"
 	"CertiBlock/application/backend/certiblock/base/data"
 	"CertiBlock/application/shared/utils"
+	"CertiBlock/application/backend/gateway"
 	"fmt"
 	"errors"
 	// "github.com/google/uuid"
@@ -135,6 +136,17 @@ func SaveUniversity(context *base.ApplicationContext, UniversityInput *data.Univ
 		return nil, errors.New("University already registered")
 	}
 
+	_, err := gateway.RegisterUniversity(
+		context.Contract,
+		UniversityInput.Name,
+		publicKeyUniv,
+		UniversityInput.Location,
+		"",
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to register university on blockchain: %w", err)
+	}
+
 
 	_, err = context.DB.Exec(
 		"INSERT INTO universities (name_university, public_key, private_key, location_university) VALUES (?, ?, ?, ?)",
@@ -193,4 +205,9 @@ func GetById(context *base.ApplicationContext, id int) (*data.University, error)
 
 	// return university
 	return &university, nil
+}
+
+func ApproveCertificateToBlockChain(context *base.ApplicationContext, cert *data.CertificateFileOutput) (string, error){
+	_, err := gateway.
+
 }
