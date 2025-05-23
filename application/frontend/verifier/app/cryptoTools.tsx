@@ -1,4 +1,7 @@
-export async function generateKey(): Promise<{ privateKey: CryptoKey | null; publicKey: CryptoKey | null}> {
+export async function generateKey(): Promise<{
+    privateKey: CryptoKey | null;
+    publicKey: CryptoKey | null;
+}> {
     try {
         const keyPair = await crypto.subtle.generateKey(
             {
@@ -21,9 +24,12 @@ export async function generateKey(): Promise<{ privateKey: CryptoKey | null; pub
     }
 }
 
-export async function exportKeyToString(key: CryptoKey): Promise<string | null> {
+
+export async function exportKeyToString(
+    key: CryptoKey | null
+): Promise<string | null> {
     try {
-        const exportedKey = await crypto.subtle.exportKey("jwk", key);
+        const exportedKey = await crypto.subtle.exportKey("jwk", key as CryptoKey);
         return JSON.stringify(exportedKey);
     } catch (error) {
         console.error("Error exporting key to string:", error);
@@ -37,8 +43,6 @@ export async function importKeyFromString(
 ): Promise<CryptoKey | null> {
     try {
         const jwk = JSON.parse(keyString);
-        console.log("JWK:", jwk);
-        console.log("Key Usage:", keyUsage);
         return await crypto.subtle.importKey(
             "jwk",
             jwk,
@@ -54,7 +58,6 @@ export async function importKeyFromString(
         return null;
     }
 }
-
 
 export function bufferSourceToString(signature: ArrayBuffer): string | null {
     try {
@@ -99,20 +102,48 @@ export async function isCorrectHash(
     }
 }
 
-export async function isSignatureValid(
+
+export async function signData(
+    privateKey: string,
+    data: string
+): Promise<string | null> {
+    try {
+        const convertedPrivateKey = await importKeyFromString(privateKey, [
+            "sign",
+        ]);
+        if (!convertedPrivateKey) {
+            return null;
+        }
+        const signature = await crypto.subtle.sign(
+            {
+                name: "ECDSA",
+                hash: { name: "SHA-256" },
+            },
+            convertedPrivateKey,
+            new TextEncoder().encode(data)
+        );
+        return bufferSourceToString(signature);
+    } catch (error) {
+        console.error("Error signing data:", error);
+        return null;
+    }
+}
+
+export async function verifySignature(
     publicKey: string,
     signature: string,
     data: string,
-    keyUsage: KeyUsage[]
 ): Promise<boolean> {
     try {
-        
-        const convertedPublicKey = await importKeyFromString(publicKey, keyUsage);
+        const convertedPublicKey = await importKeyFromString(
+            publicKey,
+            ["verify"]
+        );
         if (!convertedPublicKey) {
             return false;
         }
         const convertedSignature = stringToBufferSource(signature);
-        const convertedData = stringToBufferSource(data);
+        const convertedData = new TextEncoder().encode(data);
         if (!convertedSignature || !convertedData) {
             return false;
         }
@@ -130,3 +161,50 @@ export async function isSignatureValid(
         return false;
     }
 }
+
+(async () => {
+    // Generate a key pair
+    let { privateKey, publicKey } = await generateKey();
+
+    // Export keys to strings
+    let privateKeyString = await exportKeyToString(privateKey!);
+    let publicKeyString = await exportKeyToString(publicKey!);
+
+    privateKey = await importKeyFromString(privateKeyString!, ["sign"]);
+    publicKey = await importKeyFromString(publicKeyString!, ["verify"]);
+
+
+    // Data to sign
+    const data = "Hello, world!";
+
+    // Sign the data
+    // let signature: ArrayBuffer | null = await crypto.subtle.sign(
+    //     {
+    //         name: "ECDSA",
+    //         hash: { name: "SHA-256" },
+    //     },
+    //     privateKey!,
+    //     new TextEncoder().encode(data)
+    // );
+
+    // const signatureString = bufferSourceToString(signature!);
+    // let reSignature = stringToBufferSource(signatureString!);
+
+    // const isValid = await crypto.subtle.verify(
+    //     {
+    //         name: "ECDSA",
+    //         hash: { name: "SHA-256" },
+    //     },
+    //     publicKey!,
+    //     reSignature as ArrayBuffer,
+    //     new TextEncoder().encode(data)
+    // );
+
+    // Sign the data
+    const signature = await signData(privateKeyString!, data);
+    console.log("Signature:", signature);
+
+    // Verify the signature
+    const isValid = await verifySignature(publicKeyString!, signature!, data);
+    console.log("Is signature valid?", isValid);
+})();
