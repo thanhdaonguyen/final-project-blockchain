@@ -61,6 +61,7 @@ const Register: React.FC = () => {
   const router = useRouter();
 
   const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
+    console.log('Received values of form: ', values);
     console.log('BACKEND_URL =', BACKEND_URL);
     const res = await fetch(`${BACKEND_URL}/api/universities/register`, {
       method: 'POST',

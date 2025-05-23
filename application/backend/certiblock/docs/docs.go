@@ -333,6 +333,35 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/universities": {
+            "get": {
+                "description": "Get all universities",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "universities"
+                ],
+                "summary": "Get all universities",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/data.University"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    }
+                }
+            }
+        },
         "/api/universities/certificate-file": {
             "post": {
                 "description": "Add a certificate file",
@@ -464,6 +493,47 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/universities/{id}": {
+            "get": {
+                "description": "Retrieve a university by its unique ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "universities"
+                ],
+                "summary": "Get a university by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "University ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/data.University"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/gin.H"
                         }
@@ -611,6 +681,12 @@ const docTemplate = `{
                 },
                 "password": {
                     "type": "string"
+                },
+                "privateKey": {
+                    "type": "string"
+                },
+                "publicKey": {
+                    "type": "string"
                 }
             }
         },
@@ -624,6 +700,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "publicKey": {
+                    "type": "string"
+                }
+            }
+        },
+        "data.University": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
                     "type": "string"
                 }
             }

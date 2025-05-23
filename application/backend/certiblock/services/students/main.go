@@ -10,48 +10,49 @@ import (
 	"errors"
 )
 
+    
+
 func RegisterStudent(context *base.ApplicationContext, studentInput *data.StudentInput) (*data.StudentOutput, error) {
 	country, err := countries.GetById(context, studentInput.CountryID)
 	if err != nil || country == nil {
 		return nil, errors.New("country not found")
 	}
 
-	privateKeyString := utils.HashSHA512(
-		country.Name + studentInput.NIN + studentInput.FullName + studentInput.DateOfBirth + studentInput.Password,
-	)
-	publicKeyString, err := utils.ComputePublicKeyString(privateKeyString)
-	if err != nil {
-		return nil, errors.New("error computing public key")
-	}
+	
+	nin := studentInput.NIN
+	countryID := studentInput.CountryID
+	privateKey := studentInput.PrivateKey
+	publicKey := studentInput.PublicKey
+	dateOfBirth := studentInput.DateOfBirth
+	fullName := studentInput.FullName
+	password := studentInput.Password
 
-	row := context.DB.QueryRow("SELECT public_key FROM students WHERE public_key = ?", publicKeyString)
-	var existingPublicKey string
-	err = row.Scan(&existingPublicKey)
+
+	row := context.DB.QueryRow("SELECT nin FROM students WHERE public_key = ?", nin)
+	var existingNin string
+	err = row.Scan(&existingNin)
 	if err == nil {
 		return nil, errors.New("student already registered")
 	}
 
-	encryptedPartialPersonalInfo1, encryptedPartialPersonalInfo2, err := utils.ElGamalEncryptString(
-		publicKeyString,
-		studentInput.FullName,
-	)
-	if err != nil {
-		return nil, errors.New("error encrypting partial personal info")
-	}
-
 	_, err = context.DB.Exec(
-		"INSERT INTO students (public_key, encrypted_partial_personal_info_1, encrypted_partial_personal_info_2) VALUES (?, ?, ?)",
-		publicKeyString,
-		encryptedPartialPersonalInfo1,
-		encryptedPartialPersonalInfo2,
+		"INSERT INTO students (nin, country_id, date_of_birth, full_name, password, private_key, public_key) VALUES (?, ?, ?, ?, ?, ?, ?)",
+		nin,
+		countryID,
+		dateOfBirth,
+		fullName,
+		password,
+		privateKey,
+		publicKey,
+
 	)
 	if err != nil {
 		return nil, fmt.Errorf("error inserting student: %w", err)
 	}
 
 	return &data.StudentOutput{
-		PrivateKey: privateKeyString,
-		PublicKey:  publicKeyString,
+		PrivateKey: privateKey,
+		PublicKey:  publicKey,
 		FullName:   studentInput.FullName,
 	}, nil
 }

@@ -6,6 +6,7 @@ import (
 	"CertiBlock/application/backend/certiblock/services/certificates"
 	"CertiBlock/application/backend/certiblock/services/students"
 	"net/http"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -92,7 +93,7 @@ func LoginStudent(context *base.ApplicationContext) func(c *gin.Context) {
 func GetAllCertificatesByStudent(context *base.ApplicationContext) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		var studentAuth data.StudentAuth
-		
+
 		if err := c.ShouldBindJSON(&studentAuth); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),

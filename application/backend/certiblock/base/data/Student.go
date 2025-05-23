@@ -6,6 +6,8 @@ type StudentInput struct {
 	FullName    string `json:"fullName"`
 	DateOfBirth string `json:"dateOfBirth"`
 	Password    string `json:"password"`
+	PrivateKey  string `json:"privateKey"`
+	PublicKey   string `json:"publicKey"`
 }
 
 type StudentOutput struct {

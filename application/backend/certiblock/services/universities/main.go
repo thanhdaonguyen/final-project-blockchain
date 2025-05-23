@@ -150,3 +150,44 @@ func SaveUniversity(context *base.ApplicationContext, UniversityInput *data.Univ
 		PublicKey:  publicKeyUniv,
 	}, nil
 }
+
+func GetAll(context *base.ApplicationContext) ([]data.University, error) {
+	// query universities
+	rows, err := context.DB.Query("SELECT `id`, `name_university` FROM `universities`")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// iterate over rows
+	universities := []data.University{}
+	for rows.Next() {
+		university := data.University{}
+		err := rows.Scan(&university.ID, &university.Name)
+		if err != nil {
+			return nil, err
+		}
+		universities = append(universities, university)
+	}
+
+	// return universities
+	return universities, nil
+}
+
+
+func GetById(context *base.ApplicationContext, id int) (*data.University, error) {
+	// query university
+	row := context.DB.QueryRow("SELECT `id`, `name_university` FROM `universities` WHERE `id` = ?;", id)
+	if row.Err() != nil {
+		return nil, row.Err()
+	}
+
+	university := data.University{}
+	err := row.Scan(&university.ID, &university.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	// return university
+	return &university, nil
+}

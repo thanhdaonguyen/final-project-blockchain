@@ -64,7 +64,7 @@ func main() {
 	// CORS
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = false
-	config.AllowOrigins = []string{"http://localhost:3001", "http://localhost:3002"}
+	config.AllowOrigins = []string{"http://localhost:3001", "http://localhost:3002", "http://localhost:3003", "http://localhost:3004"}
 	config.AllowMethods = []string{"POST", "GET", "PUT", "OPTIONS", "DELETE"}
 	config.AllowHeaders = []string{"Origin", "Content-Type", "Authorization", "Accept", "User-Agent", "Cache-Control", "Pragma"}
 	config.ExposeHeaders = []string{"Content-Length", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Content-Type"}

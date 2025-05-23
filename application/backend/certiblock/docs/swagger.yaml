@@ -89,6 +89,10 @@ definitions:
         type: string
       password:
         type: string
+      privateKey:
+        type: string
+      publicKey:
+        type: string
     type: object
   data.StudentOutput:
     properties:
@@ -97,6 +101,13 @@ definitions:
       privateKey:
         type: string
       publicKey:
+        type: string
+    type: object
+  data.University:
+    properties:
+      id:
+        type: integer
+      name:
         type: string
     type: object
   data.UniversityInput:
@@ -331,6 +342,52 @@ paths:
       summary: Login a student
       tags:
       - students
+  /api/universities:
+    get:
+      description: Get all universities
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/data.University'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Get all universities
+      tags:
+      - universities
+  /api/universities/{id}:
+    get:
+      description: Retrieve a university by its unique ID
+      parameters:
+      - description: University ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/data.University'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Get a university by ID
+      tags:
+      - universities
   /api/universities/certificate-file:
     post:
       consumes:
