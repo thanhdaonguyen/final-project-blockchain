@@ -48,12 +48,13 @@ func main() {
 	context.Contract = network.GetContract("certicontract")
 
 	// Khởi tạo ledger
-	// result, err := educert.InitLedger(contract)
-	// if err != nil {
-	// 	fmt.Printf("Failed to initialize ledger: %v\n", err)
-	// 	return
-	// }
-	// fmt.Println("Ledger initialized:", result)
+	fmt.Println("Initializing blockchain ledger... ")
+	result, err := educert.InitLedger(contract)
+	if err != nil {
+		fmt.Printf("Failed to initialize ledger: %v\n", err)
+		return
+	}
+	fmt.Println("Ledger initialized:", result)
 
 	//////////////////////////////////////////////
 	/////////// END BLOCKCHAIN STUFF /////////////
