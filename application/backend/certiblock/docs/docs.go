@@ -362,7 +362,47 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/universities/certificate-file": {
+        "/api/universities/certificate-file/approve": {
+            "post": {
+                "description": "Add a certificate file",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "universities"
+                ],
+                "summary": "Add a certificate file",
+                "parameters": [
+                    {
+                        "description": "Certificate file data",
+                        "name": "certificateFile",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/data.CertificateFileUpload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/universities/certificate-file/request": {
             "post": {
                 "description": "Add a certificate file",
                 "consumes": [
@@ -569,16 +609,28 @@ const docTemplate = `{
         "data.CertificateFileUpload": {
             "type": "object",
             "properties": {
-                "dateOfIssuing": {
+                "certUUID": {
+                    "type": "string"
+                },
+                "dateOfIssue": {
                     "type": "string"
                 },
                 "encodedFile": {
                     "type": "string"
                 },
+                "isOnChain": {
+                    "type": "boolean"
+                },
                 "studentPublicKey": {
                     "type": "string"
                 },
+                "studentSignature": {
+                    "type": "string"
+                },
                 "universityName": {
+                    "type": "string"
+                },
+                "universitySignature": {
                     "type": "string"
                 }
             }

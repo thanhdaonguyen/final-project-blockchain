@@ -6,30 +6,33 @@ import (
 	"CertiBlock/application/shared/utils"
 	"fmt"
 	"errors"
-	"github.com/google/uuid"
+	// "github.com/google/uuid"
 )
 
 func SaveCertificateFile(context *base.ApplicationContext, fileUpload *data.CertificateFileUpload) (*string, error) {
-	var universityPublicKey string
-	err := context.DB.QueryRow(
-		"SELECT public_key FROM universities WHERE name_university = ?",
+	// var universityPublicKey string
+	// err := context.DB.QueryRow(
+	// 	"SELECT public_key FROM universities WHERE name_university = ?",
+	// 	fileUpload.UniversityName,
+	// ).Scan(&universityPublicKey)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("error finding public key: %w", err)
+	// }
+
+	universityPublicKey := "uniPubKey"
+
+	isOnChain := true
+
+	_, err := context.DB.Exec(
+		"INSERT INTO certificates2 (uuid, university_name, date_of_issue, plain_text_file_data, university_signature, student_signature, student_public_key, university_public_key, is_on_chain) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+		fileUpload.CertUUID,
 		fileUpload.UniversityName,
-	).Scan(&universityPublicKey)
-	if err != nil {
-		return nil, fmt.Errorf("error finding public key: %w", err)
-	}
-
-	certUUID := uuid.NewString();
-
-	isOnChain := false
-
-	_, err = context.DB.Exec(
-		"INSERT INTO certificates2 (uuid, student_public_key, university_name, university_public_key, plain_text_file_data, is_on_chain) VALUES (?, ?, ?, ?, ?, ?)",
-		certUUID,
-		fileUpload.StudentPublicKey,
-		fileUpload.UniversityName,
-		universityPublicKey,
+		fileUpload.DateOfIssue,
 		fileUpload.EncodedFile,
+		fileUpload.UniversitySignature,
+		fileUpload.StudentSignature,
+		fileUpload.StudentPublicKey,
+		universityPublicKey,
 		isOnChain,
 	)
 

@@ -25,7 +25,7 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import type { UploadProps } from "antd";
 import { University, getUniversities } from "@/utils/getUniversities";
-import { signData, verifySignature } from "./cryptoTools"
+import { signData, verifySignature } from "./cryptoTools";
 
 const { Title } = Typography;
 
@@ -144,14 +144,10 @@ const IssueCertificate: React.FC = () => {
 
     // Generate a new certificate and add it to the list
     const handleIssueCertificate = async () => {
-
         const newCertUUID = uuidv4();
         setCertUUID(newCertUUID);
 
-        const newSignature = await signData(
-            studentPrivateKey,
-            encodedFile
-        );
+        const newSignature = await signData(studentPrivateKey, encodedFile);
         setStudentSignature(newSignature as string);
 
         // const isSignatureValid = await verifySignature(
@@ -167,10 +163,11 @@ const IssueCertificate: React.FC = () => {
             return;
         }
 
-
         const requestBody = {
             certUUID: newCertUUID,
-            universityName: universityName,
+            universityName: universities.find(
+                (u) => u.value.toString() == universityName
+            )?.label,
             dateOfIssue: dateOfIssue,
             encodedFile: encodedFile,
             universitySignature: "uniSignature",
@@ -181,7 +178,7 @@ const IssueCertificate: React.FC = () => {
 
         try {
             const res = await fetch(
-                "http://localhost:3000/api/universities/certificate-file",
+                "http://localhost:3000/api/universities/certificate-file/request",
                 {
                     method: "POST",
                     headers: {

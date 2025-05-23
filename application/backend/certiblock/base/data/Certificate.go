@@ -26,11 +26,17 @@ type BlockchainCertificateOutput struct {
 
 // Certificate file upload from university
 type CertificateFileUpload struct {
-	StudentPublicKey               string `json:"studentPublicKey"`
-	UniversityName   string `json:"universityName"`
-	DateOfIssuing string `json:"dateOfIssuing"`
-	EncodedFile        string `json:"encodedFile"`
+	CertUUID            string `json:"certUUID"`
+	UniversityName      string `json:"universityName"`
+	DateOfIssue         string `json:"dateOfIssue"`
+	EncodedFile         string `json:"encodedFile"`
+	UniversitySignature string `json:"universitySignature"`
+	StudentSignature    string `json:"studentSignature"`
+	StudentPublicKey    string `json:"studentPublicKey"`
+	IsOnChain           bool   `json:"isOnChain"`
 }
+
+
 
 type CertificateFileOutput struct {
 	CertUUID            string `json:"cert_uuid"`

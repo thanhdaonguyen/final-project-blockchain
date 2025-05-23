@@ -16,13 +16,21 @@ definitions:
     type: object
   data.CertificateFileUpload:
     properties:
-      dateOfIssuing:
+      certUUID:
+        type: string
+      dateOfIssue:
         type: string
       encodedFile:
         type: string
+      isOnChain:
+        type: boolean
       studentPublicKey:
         type: string
+      studentSignature:
+        type: string
       universityName:
+        type: string
+      universitySignature:
         type: string
     type: object
   data.CertificateOutput:
@@ -388,7 +396,33 @@ paths:
       summary: Get a university by ID
       tags:
       - universities
-  /api/universities/certificate-file:
+  /api/universities/certificate-file/approve:
+    post:
+      consumes:
+      - application/json
+      description: Add a certificate file
+      parameters:
+      - description: Certificate file data
+        in: body
+        name: certificateFile
+        required: true
+        schema:
+          $ref: '#/definitions/data.CertificateFileUpload'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Add a certificate file
+      tags:
+      - universities
+  /api/universities/certificate-file/request:
     post:
       consumes:
       - application/json
