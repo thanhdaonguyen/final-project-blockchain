@@ -7,11 +7,11 @@ A blockchain platform for decentralized, trustworthy issuance and verification o
     - [Requirements](#requirements)
     - [Setup Network](#setup-network)
     - [Run Applications](#run-applications)
-      - [The Native App for Issuing Certificates](#the-native-app-for-issuing-certificates)
-      - [The Web App for Viewing Personal Certificates](#the-web-app-for-viewing-personal-certificates)
-      - [The Web App for Verifying Certificates by QR Codes](#the-web-app-for-verifying-certificates-by-qr-codes)
+      - [Backend Service](#the-backend-for-handling-web-services-and-connect-to-blockchain)
+      - [Student Interface](#the-student-interface-for-viewing-personal-certificates-and-issuing-new-certificates)
+      - [University Interface](#the-university-interface-for-examing-requests-from-students-to-acknowledge-digital-certificates)
+      - [Verifier Web App](#the-web-app-for-verifying-certificates-by-qr-codes)
   - [Technologies](#technologies)
-  - [Authors and Licensing](#authors-and-licensing)
 
 ## Run on Local Machine
 
@@ -62,43 +62,49 @@ directory, run:
 
 ### Run Applications
 
-#### The Native App for Issuing Certificates
+#### The Backend for handling Web services and connect to Blockchain.
 
-To be run on each university's private machines.
-
-```sh
-cd application/nodeapp
-wails dev
-# Or, if you're using Ubuntu 24.04 or some new system
-wails dev -tags webkit2_41
 ```
-
-#### The Web App for Viewing Personal Certificates
-
-To be accessed by students alike.
-
-First, in `application/backend/certiblock`, create a new file
-named `.env`. Specify the appropriate environment variables
-as instructed in `.env.example` (also in that same directory).
-The backend makes use of MySQL RDBMS.
-
-```sh
 cd application/backend/certiblock
 ./run
+```
 
-cd ../../../application/frontend/recipient
-npm i
+#### The Student Interface for Viewing Personal Certificates and Issuing New Certificates
+
+```sh
+cd application/frontend/recipient
+npm install
+npm run dev
+```
+
+#### The University Interface for Examing Requests from students to acknowledge digital certificates.
+
+
+```sh
+cd /application/frontend/registerUniversity
+npm install
 npm run dev
 ```
 
 #### The Web App for Verifying Certificates by QR Codes
 
-TODO
+```sh
+cd /application/frontend/verifier
+npm install
+npm run dev
+```
 
 ## Technologies
 
-TODO
+CertiBlock leverages the following technologies:
 
-## Authors and Licensing
+- **Hyperledger Fabric**: Permissioned blockchain framework for secure, scalable certificate management.
+- **Go**: Backend and smart contract (chaincode) development.
+- **Node.js & npm**: Frontend development and package management.
+- **React**: User interfaces for web applications.
+- **Docker**: Containerization of services and network components.
+- **CouchDB**: State database for Hyperledger Fabric.
+- **QR Code Libraries**: For certificate verification workflows.
+- **WSL2**: For running Linux-based tools on Windows environments.
 
-TODO
+
