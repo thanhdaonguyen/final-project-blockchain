@@ -76,7 +76,6 @@ func main() {
 	controllers.CountriesAPI(&context, apiRouter.Group("/countries"))
 	controllers.StudentsAPI(&context, apiRouter.Group("/students"))
 	controllers.UniversitiesAPI(&context, apiRouter.Group("/universities"))
-	controllers.QRsAPI(&context, apiRouter.Group("/qrs"))
 	controllers.BlockchainAPI(&context, apiRouter.Group("/blockchain"))
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

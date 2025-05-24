@@ -4,7 +4,7 @@ import { Layout } from 'antd';
 import type { Metadata } from 'next'
  
 export const metadata: Metadata = {
-  title: 'CertiBlock Issuer',
+  title: 'CertiBlock University',
 }
 
 export default function RootLayout({

@@ -32,7 +32,7 @@ interface Certificate {
 }
 
 const Dashboard: React.FC = () => {
-    const [isModalShareOpen, setIsModalShareOpen] = useState<boolean>(true);
+    const [isModalShareOpen, setIsModalShareOpen] = useState<boolean>(false);
     const [isCheckModalOpen, setIsModalCheckOpen] = useState<boolean>(false);
     const [selectedCheckCertificate, setSelectedCheckCertificate] =
         useState<Certificate | null>(null);

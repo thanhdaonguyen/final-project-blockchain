@@ -4,7 +4,7 @@ import Link from 'next/link';
 export default function Home() {
   return (
     <div style={{ textAlign: 'center', marginTop: '50px' }}>
-      <h1>Welcome to recipient website, please login or register.</h1>
+      <h1>Welcome to student website, please login or register.</h1>
 
       <div style={{ marginTop: '20px' }}>
         <Link href="/login" passHref>

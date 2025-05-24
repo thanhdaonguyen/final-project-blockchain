@@ -12,7 +12,7 @@ import (
 
 func StudentsAPI(context *base.ApplicationContext, r *gin.RouterGroup) {
 	r.POST("", RegisterStudent(context))
-	r.POST("/login", LoginStudent(context))
+	// r.POST("/login", LoginStudent(context))
 	r.POST("/certificates", GetAllCertificatesByStudent(context))
 	r.POST("/certificates/:certUUID", GetOneCertificateOfStudent(context))
 }
@@ -59,26 +59,26 @@ func RegisterStudent(context *base.ApplicationContext) func(c *gin.Context) {
 // @Success 200 {object} data.StudentOutput
 // @Failure 400 {object} gin.H
 // @Router /api/students/login [post]
-func LoginStudent(context *base.ApplicationContext) func(c *gin.Context) {
-	return func(c *gin.Context) {
-		var studentInput data.StudentInput
-		if err := c.ShouldBindJSON(&studentInput); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-		student, err := students.LoginStudent(context, &studentInput)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
+// func LoginStudent(context *base.ApplicationContext) func(c *gin.Context) {
+// 	return func(c *gin.Context) {
+// 		var studentInput data.StudentInput
+// 		if err := c.ShouldBindJSON(&studentInput); err != nil {
+// 			c.JSON(http.StatusBadRequest, gin.H{
+// 				"error": err.Error(),
+// 			})
+// 			return
+// 		}
+// 		student, err := students.LoginStudent(context, &studentInput)
+// 		if err != nil {
+// 			c.JSON(http.StatusBadRequest, gin.H{
+// 				"error": err.Error(),
+// 			})
+// 			return
+// 		}
 
-		c.JSON(http.StatusOK, student)
-	}
-}
+// 		c.JSON(http.StatusOK, student)
+// 	}
+// }
 
 // POST /api/students/certificates
 // @Tags students

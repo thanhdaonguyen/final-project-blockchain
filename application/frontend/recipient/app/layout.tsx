@@ -6,7 +6,7 @@ import { Layout } from 'antd';
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'CertiBlock Recipient',
+  title: 'CertiBlock Student',
 }
 
 
