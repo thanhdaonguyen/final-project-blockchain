@@ -3,8 +3,8 @@ package universities
 import (
 	"CertiBlock/application/backend/certiblock/base"
 	"CertiBlock/application/backend/certiblock/base/data"
-	"CertiBlock/application/shared/utils"
-	"CertiBlock/application/backend/gateway"
+	"encoding/base64"
+	gateway "CertiBlock/application/backend/gateway"
 	"fmt"
 	"errors"
 	// "github.com/google/uuid"
@@ -22,7 +22,7 @@ func SaveCertificateFile(context *base.ApplicationContext, fileUpload *data.Cert
 
 	universityPublicKey := "uniPubKey"
 
-	isOnChain := true
+	isOnChain := false
 
 	_, err := context.DB.Exec(
 		"INSERT INTO certificates2 (uuid, university_name, date_of_issue, plain_text_file_data, university_signature, student_signature, student_public_key, university_public_key, is_on_chain) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -85,7 +85,7 @@ func GetCertificatesOnChain(context *base.ApplicationContext) ([]data.Certificat
 
 func GetCertificatesNotOnChain(context *base.ApplicationContext) ([]data.CertificateFileOutput, error) {
 	query := `
-	SELECT uuid, student_public_key, university_name, university_public_key, plain_text_file_data, is_on_chain
+	SELECT uuid, student_public_key, university_name, university_public_key, plain_text_file_data, is_on_chain, university_signature, student_signature, date_of_issue
 	FROM certificates2
 	WHERE is_on_chain = 0
 	`
@@ -106,6 +106,10 @@ func GetCertificatesNotOnChain(context *base.ApplicationContext) ([]data.Certifi
 			&cert.UniversityPublicKey,
 			&cert.PlantextFileData,
 			&cert.IsOnChain,
+			&cert.UniversitySignature,
+			&cert.StudentSignature,
+			&cert.DateOfIssue,
+
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan row: %w", err)
@@ -122,26 +126,27 @@ func GetCertificatesNotOnChain(context *base.ApplicationContext) ([]data.Certifi
 }
 
 func SaveUniversity(context *base.ApplicationContext, UniversityInput *data.UniversityInput) (*data.UniversityOutput, error) {
-	privateKeyUniv := utils.HashSHA512(UniversityInput.Name+UniversityInput.Password+UniversityInput.Location)
 
-	publicKeyUniv, err := utils.ComputePublicKeyString(privateKeyUniv)
-	if err != nil {
-		return nil, fmt.Errorf("error computing public key of Univ: %w", err)
-	}
+	nameUniversity := UniversityInput.Name
+	passwordUniv := UniversityInput.Password
+	privateKeyUniv := UniversityInput.PrivateKey
+	publicKeyUniv := UniversityInput.PublicKey
+	locationUniv := UniversityInput.Location
+	descriptionUniv := UniversityInput.Description
 
-	row := context.DB.QueryRow("SELECT public_key FROM universities WHERE public_key = ?", publicKeyUniv)
+	row := context.DB.QueryRow("SELECT * FROM universities WHERE nameUniversity = ? AND passwordUniv = ?", publicKeyUniv, passwordUniv)
 	var existingPublicKey string
-	err = row.Scan(&existingPublicKey)
+	err := row.Scan(&existingPublicKey)
 	if err == nil {
 		return nil, errors.New("University already registered")
 	}
 
-	_, err := gateway.RegisterUniversity(
+	_, err = gateway.RegisterUniversity(
 		context.Contract,
-		UniversityInput.Name,
+		nameUniversity,
 		publicKeyUniv,
-		UniversityInput.Location,
-		"",
+		locationUniv,
+		descriptionUniv,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to register university on blockchain: %w", err)
@@ -149,18 +154,20 @@ func SaveUniversity(context *base.ApplicationContext, UniversityInput *data.Univ
 
 
 	_, err = context.DB.Exec(
-		"INSERT INTO universities (name_university, public_key, private_key, location_university) VALUES (?, ?, ?, ?)",
-		UniversityInput.Name,
+		"INSERT INTO universities (name_university, password, public_key, private_key, location_university, description_university) VALUES (?, ?, ?, ?, ?, ?)",
+		nameUniversity,
+		passwordUniv,
 		publicKeyUniv,
 		privateKeyUniv,
-		UniversityInput.Location,
+		locationUniv,
+		descriptionUniv,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("error inserting university: %w", err)
 	}
 
 	return &data.UniversityOutput{
-		Name: UniversityInput.Name,
+		Name: nameUniversity,
 		PrivateKey: privateKeyUniv,
 		PublicKey:  publicKeyUniv,
 	}, nil
@@ -207,7 +214,41 @@ func GetById(context *base.ApplicationContext, id int) (*data.University, error)
 	return &university, nil
 }
 
-func ApproveCertificateToBlockChain(context *base.ApplicationContext, cert *data.CertificateFileOutput) (string, error){
-	_, err := gateway.
+func ApproveCertificateToBlockChain(context *base.ApplicationContext, cert *data.BlockchainCertificateOutput) (string, error){
 
+	fmt.Println("studentPublicKey", cert.StudentPublicKey)
+	fmt.Println("universityPublicKey", cert.UniversityPublicKey)
+	base64StudentPublicKey := base64.StdEncoding.EncodeToString([]byte(cert.StudentPublicKey))
+	fmt.Println("base64StudentPublicKey", base64StudentPublicKey)
+	_, err := gateway.IssueCertificate(
+		context.Contract,
+		cert.CertHash,
+		cert.UniversitySignature,
+		cert.StudentSignature,
+		cert.DateOfIssuing,
+		cert.CertUUID,
+		cert.UniversityPublicKey,
+		base64StudentPublicKey,
+	)
+	if err != nil {
+		return "", err
+	}
+
+	// fmt.Println("cert.CertUUID", cert.CertUUID)
+	// fmt.Println("cert.UniversitySignature", cert.UniversitySignature)
+	// fmt.Println("cert.StudentSignature", cert.StudentSignature)
+	// fmt.Println("cert.DateOfIssuing", cert.DateOfIssuing)
+	// fmt.Println("cert.UniversityPublicKey", cert.UniversityPublicKey)
+	// fmt.Println("cert.StudentPublicKey", cert.StudentPublicKey)
+	// fmt.Println("cert.CertHash", cert.CertHash)
+	// fmt.Println("cert.DateOfIssuing", cert.DateOfIssuing)
+
+	_, err = context.DB.Exec("UPDATE certiblock.certificates2 SET is_on_chain = 1, university_signature = ?, university_public_key = ? WHERE uuid = ?", cert.UniversitySignature, cert.UniversityPublicKey, cert.CertUUID)
+	if err != nil {
+		return "", err
+	}
+
+
+	return "", nil
 }
+

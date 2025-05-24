@@ -100,7 +100,7 @@ func GetAllCertificatesByStudent(context *base.ApplicationContext) func(c *gin.C
 			})
 			return
 		}
-		certificates, err := certificates.GetAllCertificatesByStudent(context, studentAuth.PrivateKey)
+		certificates, err := certificates.GetAllCertificatesByStudent(context, studentAuth.PublicKey)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),
@@ -135,7 +135,7 @@ func GetOneCertificateOfStudent(context *base.ApplicationContext) func(c *gin.Co
 
 		certUUID := c.Param("certUUID")
 
-		certificate, err := certificates.GetOneCertificate(context, studentAuth.PrivateKey, certUUID)
+		certificate, err := certificates.GetOneCertificate(context, studentAuth.PublicKey, certUUID)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),

@@ -49,7 +49,7 @@ func main() {
 
 	// Khởi tạo ledger
 	fmt.Println("Initializing blockchain ledger... ")
-	result, err := educert.InitLedger(contract)
+	result, err := educert.InitLedger(context.Contract)
 	if err != nil {
 		fmt.Printf("Failed to initialize ledger: %v\n", err)
 		return
@@ -77,6 +77,7 @@ func main() {
 	controllers.StudentsAPI(&context, apiRouter.Group("/students"))
 	controllers.UniversitiesAPI(&context, apiRouter.Group("/universities"))
 	controllers.QRsAPI(&context, apiRouter.Group("/qrs"))
+	controllers.BlockchainAPI(&context, apiRouter.Group("/blockchain"))
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

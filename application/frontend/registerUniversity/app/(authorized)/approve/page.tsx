@@ -1,150 +1,10 @@
-// 'use client';
-// import React, { useState } from 'react';
-// import { Button, Modal, QRCode, Table, Typography, Input } from 'antd';
-
-// const { Title, Text } = Typography;
-// const { Search } = Input;
-
-// // Define types for certificate data
-// interface Certificate {
-//   certificateId: string;
-//   recipientName: string;
-//   issueDate: string;
-//   validity: string;
-// }
-
-
-// const Dashboard: React.FC = () => {
-//   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-//   const [selectedCertificate, setSelectedCertificate] = useState<Certificate | null>(null);
-//   const [searchQuery, setSearchQuery] = useState<string>('');
-
-//   // Demo data for multiple certificates
-//   const certificates: Certificate[] = [
-//     {
-//       certificateId: '123456',
-//       recipientName: 'John Doe',
-//       issueDate: 'March 2025',
-//       validity: 'Lifetime',
-//     },
-//     {
-//       certificateId: '789012',
-//       recipientName: 'Emily Johnson',
-//       issueDate: 'January 2025',
-//       validity: 'Lifetime',
-//     },
-//     {
-//       certificateId: '345678',
-//       recipientName: 'Michael Brown',
-//       issueDate: 'July 2024',
-//       validity: '1 Year',
-//     },
-//     {
-//       certificateId: '901234',
-//       recipientName: 'Sophia Lee',
-//       issueDate: 'December 2024',
-//       validity: 'Lifetime',
-//     },
-//   ];
-
-//     // Columns definition for the Ant Design Table
-//     const columns = [
-//       {
-//         title: 'Certificate ID',
-//         dataIndex: 'certificateId',
-//         key: 'certificateId',
-//       },
-//       {
-//         title: 'Recipient Name',
-//         dataIndex: 'recipientName',
-//         key: 'recipientName',
-//       },
-//       {
-//         title: 'Issue Date',
-//         dataIndex: 'issueDate',
-//         key: 'issueDate',
-//       },
-//       {
-//         title: 'Validity',
-//         dataIndex: 'validity',
-//         key: 'validity',
-//       },
-//       {
-//         title: 'Action',
-//         key: 'action',
-//         render: (text: any, record: Certificate) => (
-//           <Button type="primary" onClick={() => handleShare(record)}>
-//             Share
-//           </Button>
-//         ),
-//       },
-//     ];
-//   // Filter certificates based on the search query
-//   const filteredCertificates = certificates.filter(
-//     (certificate) =>
-//       certificate.recipientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-//       certificate.certificateId.includes(searchQuery)
-//   );
-
-//   const handleShare = (certificate: Certificate): void => {
-//     setSelectedCertificate(certificate);
-//     setIsModalOpen(true);
-//   };
-
-//   const handleOk = (): void => {
-//     setIsModalOpen(false);
-//   };
-
-//   const handleCancel = (): void => {
-//     setIsModalOpen(false);
-//   };
-
-//   return (
-//     <div style={{ padding: '20px' }}>
-//       <Title level={2}>Certificates Issued</Title>
-
-//       {/* Search Input */}
-//       <Search
-//         placeholder="Search by Recipient Name, or Certificate ID"
-//         onChange={(e) => setSearchQuery(e.target.value)}
-//         style={{ marginBottom: '20px', width: '100%' }}
-//       />
-
-//       {/* Table to display certificates */}
-//       <Table
-//         columns={columns}
-//         dataSource={filteredCertificates}
-//         rowKey="certificateId"
-//         pagination={false} // Disable pagination, you can enable it if needed
-//       />
-
-//       {selectedCertificate && (
-//         <Modal
-//           title="Share Certificate"
-//           open={isModalOpen}
-//           onOk={handleOk}
-//           onCancel={handleCancel}
-//           footer={[
-//             <Button key="back" onClick={handleCancel}>
-//               Close
-//             </Button>
-//           ]}
-//         >
-//           <QRCode value={`https://example.com/certificate/${selectedCertificate.certificateId}`} />
-//           <Text>Scan this QR code to view or share your certificate.</Text>
-//         </Modal>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default Dashboard;
 
 
 'use client';
 import React, { useEffect, useState } from 'react';
-import { Button, Modal, QRCode, Table, Typography, Input, message, Space, Tag } from 'antd';
+import { Button, Modal, QRCode, Table, Typography, Input, message, Space, Tag, Divider, Card,  } from 'antd';
 import { BACKEND_URL } from "@/utils/env";
+import { getHash, signData } from './cryptoTools'
 
 
 const { Title, Text } = Typography;
@@ -155,8 +15,11 @@ interface Certificate {
   is_on_chain: boolean;
   plain_text_file_data: string;
   student_public_key: string;
-  universityPublicKey: string;
+  university_public_key: string;
   university_name: string;
+  date_of_issue: string;
+  university_signature: string;
+  student_signature: string;
 }
 
 const Dashboard: React.FC = () => {
@@ -166,6 +29,14 @@ const Dashboard: React.FC = () => {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [showTable, setShowTable] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
+  const [loginData, setLoginData] = useState<any>(null);
+
+  useEffect(() => {
+    const data = localStorage.getItem('loginData');
+    if (data) {
+      setLoginData(JSON.parse(data));
+    }
+  }, []);
 
   useEffect(() => {
     const fetchCertificates = async () => {
@@ -183,20 +54,50 @@ const Dashboard: React.FC = () => {
     fetchCertificates();
   }, []);
 
-  const handleApprove = async (certificate : Certificate) => {
+
+	// CertHash            string `json:"certHash"`
+	// UniversitySignature string `json:"universitySignature"`
+	// StudentSignature    string `json:"studentSignature"`
+	// DateOfIssuing       string `json:"dateOfIssuing"`
+	// CertUUID            string `json:"certUUID"`
+	// UniversityPublicKey string `json:"universityPK"`
+	// StudentPublicKey    string `json:"studentPK"`
+
+  const handleApprove = async (certificate: Certificate) => {
+    console.log('Approving certificate:', certificate);
     setLoading(true);
+
+    const newCertHash = await getHash(certificate.plain_text_file_data);
+    console.log('New certificate hash:', newCertHash);
+    const newUniversitySignature = await signData(
+      loginData.privateKey,
+      certificate.plain_text_file_data
+    );
+
+    console.log("Date of Issuing:", certificate.date_of_issue);
+
+    const requestBody = {
+      certHash: newCertHash,
+      universitySignature: newUniversitySignature,
+      studentSignature: certificate.student_signature, // Placeholder, replace with actual student signature
+      dateOfIssuing: certificate.date_of_issue, // Placeholder, replace with actual date of issuing
+      certUUID: certificate.cert_uuid,
+      universityPK: loginData.publicKey,
+      studentPK: certificate.student_public_key,
+    }
+
     try {
-      const response = await fetch(`${BACKEND_URL}/api/universities/certificates/appove`, {
+      const response = await fetch(`${BACKEND_URL}/api/universities/certificate-file/approve`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ cert_uuid: certificate.cert_uuid }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) throw new Error('Approval failed');
 
-      message.success('Certificate approved and added to blockchain');
+      console.log('Certificate approved and added to blockchain');
 
       const res = await fetch(`${BACKEND_URL}/api/universities/certificates/not_on_chain`);
       const data = await res.json();
@@ -221,29 +122,19 @@ const Dashboard: React.FC = () => {
       key: 'university_name',
     },
     {
-      title: 'Student Public Key',
-      dataIndex: 'student_public_key',
-      key: 'student_public_key',
-      render: (text: string) => text.substring(0, 10) + '...', // Hiển thị rút gọn
-    },
-    {
-      title: 'Plain Text',
-      dataIndex: 'plain_text_file_data',
-      key: 'plain_text_file_data',
-      render: (text: string) => text.substring(0, 10) + '...', // Hiển thị rút gọn
-    },
-    {
-      title: 'On Chain',
-      dataIndex: 'is_on_chain',
-      key: 'is_on_chain',
-      render: (isOnChain: boolean) => (
-        <Tag color={isOnChain ? 'green' : 'red'}>
-          {isOnChain ? 'Yes' : 'No'}
-        </Tag>
+      title: 'Examine Cert',
+      key: 'action',
+      render: (text: any, record: Certificate) => (
+        <Button
+          type="default"
+          onClick={() => handleExamine(record)}
+        >
+          Examine
+        </Button>
       ),
     },
     {
-      title: 'Action',
+      title: 'Approve?',
       key: 'action',
       render: (text: any, record: Certificate) => (
         <Button 
@@ -262,16 +153,16 @@ const Dashboard: React.FC = () => {
     (certificate) =>
       certificate.university_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       certificate.cert_uuid?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      certificate.student_public_key?.toLowerCase().includes(searchQuery.toLowerCase())
+      certificate.student_public_key?.toLowerCase().includes(searchQuery.toLowerCase())                             
   );
 
-  const handleShare = (certificate: Certificate): void => {
+  const handleExamine = (certificate: Certificate): void => {
     setSelectedCertificate(certificate);
-    setIsModalOpen(true);
+    handleOk()
   };
 
   const handleOk = (): void => {
-    setIsModalOpen(false);
+    setIsModalOpen(true);
   };
 
   const handleCancel = (): void => {
@@ -310,19 +201,71 @@ const Dashboard: React.FC = () => {
 
       {selectedCertificate && (
         <Modal
-          title="Share Certificate"
-          open={isModalOpen}
-          onOk={handleOk}
-          onCancel={handleCancel}
-          footer={[
-            <Button key="back" onClick={handleCancel}>
-              Close
-            </Button>
-          ]}
-        >
-          <QRCode value={`https://example.com/certificate/${selectedCertificate.cert_uuid}`} />
-          <Text>Scan this QR code to view or share your certificate.</Text>
-        </Modal>
+                title={
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                        <span>Examine Certificate File</span>
+                    </div>
+                }
+                open={isModalOpen}
+                onCancel={handleCancel}
+                width={700}
+                style={{ top: 20 }}
+                footer={[
+                    <Button
+                        key="close"
+                        onClick={handleCancel}
+                        size="large"
+                    >
+                        Close
+                    </Button>,
+                ]}
+            >
+                <Divider />
+
+                <Card
+                    title="Certificate Meta Data"
+                    style={{ marginBottom: "20px", borderRadius: "6px" }}
+                >
+                    <pre
+                        style={{
+                            whiteSpace: "pre-wrap",
+                            wordWrap: "break-word",
+                            background: "#f5f5f5",
+                            padding: "16px",
+                            borderRadius: "6px",
+                            maxHeight: "400px",
+                            overflow: "auto",
+                            border: "1px solid #e8e8e8",
+                        }}
+                    >
+                        Certificate ID: {selectedCertificate?.cert_uuid}
+                        {"\n"}
+                        Date of Issue: {selectedCertificate?.date_of_issue}
+                        {"\n"}
+                        University Name: {selectedCertificate?.university_name}
+                    </pre>
+                </Card>
+
+                <Card
+                    title="Certificate Details"
+                    style={{ marginBottom: "20px", borderRadius: "6px" }}
+                >
+                    <pre
+                        style={{
+                            whiteSpace: "pre-wrap",
+                            wordWrap: "break-word",
+                            background: "#f5f5f5",
+                            padding: "16px",
+                            borderRadius: "6px",
+                            maxHeight: "400px",
+                            overflow: "auto",
+                            border: "1px solid #e8e8e8",
+                        }}
+                    >
+                        {selectedCertificate.plain_text_file_data}
+                    </pre>
+                </Card>
+            </Modal>
       )}
     </div>
   );

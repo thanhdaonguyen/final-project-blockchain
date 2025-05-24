@@ -8,9 +8,17 @@ type CertificateOutput struct {
 	DateOfIssuing       string `json:"dateOfIssuing"`
 }
 
-type CertificateOutputFull struct {
-	CertificateOutput
-	Base64File string `json:"base64File"`
+
+
+type OneCertificateOutputFull struct {
+	CertUUID 		  string `json:"uuid"`
+	StudentPublicKey    string `json:"student_public_key"`
+	UniversityPublicKey string `json:"university_public_key"`
+	UniversityName      string `json:"university_name"`
+	DateOfIssue		 string `json:"date_of_issue"`
+	StudentSignature	string `json:"student_signature"`
+	UniversitySignature string `json:"university_signature"`
+	PlantextFileData	string `json:"plain_text_file_data"`
 }
 
 // Certificate as stored in the blockchain
@@ -42,9 +50,12 @@ type CertificateFileOutput struct {
 	CertUUID            string `json:"cert_uuid"`
 	StudentPublicKey	string `json:"student_public_key"`
 	UniversityName		string `json:"university_name"`
-	UniversityPublicKey string `json:"university_public_key`
+	UniversityPublicKey string `json:"university_public_key"`
 	PlantextFileData	string `json:"plain_text_file_data"`
 	IsOnChain           bool   `json:"is_on_chain"`
+	UniversitySignature string `json:"university_signature"`
+	StudentSignature    string `json:"student_signature"`
+	DateOfIssue         string `json:"date_of_issue"`
 }
 
 type CertificateApprovalRequest struct {

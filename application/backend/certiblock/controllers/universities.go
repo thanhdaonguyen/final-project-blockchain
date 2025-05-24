@@ -11,75 +11,13 @@ import (
 )
 
 func UniversitiesAPI(context *base.ApplicationContext, r *gin.RouterGroup) {
-	r.POST("/certificate-file/request", RequestCertificateFile(context))
-	r.POST("/certificate-file/approve", ApproveCertificateFile(context))
+	r.POST("/certificate-file/request", RequestCertificate(context))
+	r.POST("/certificate-file/approve", ApproveCertificate(context))
 	r.POST("/register", RegisterUniversity(context))
 	r.GET("/certificates/on_chain", GetCertificatesOnChain(context))
 	r.GET("/certificates/not_on_chain", GetCertificatesNotOnChain(context))
 	r.GET("", GetUniversities(context))
 	r.GET("/:id", GetUniversityById(context))
-}
-
-// POST /api/universities/certificate-file/request
-// @Tags universities
-// @Summary Student issue a certificate file
-// @Description Student issue a certificate file
-// @Accept json
-// @Produce json
-// @Param certificateFile body data.CertificateFileUpload true "Certificate file data"
-// @Success 201 {object} gin.H
-// @Failure 400 {object} gin.H
-// @Router /api/universities/certificate-file/request [post]
-func RequestCertificateFile(context *base.ApplicationContext) func(c *gin.Context) {
-	return func(c *gin.Context) {
-		var certificateFileUpload data.CertificateFileUpload
-		if err := c.ShouldBindJSON(&certificateFileUpload); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-
-		_, err := universities.SaveCertificateFile(context, &certificateFileUpload)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-		c.JSON(http.StatusCreated, gin.H{})
-	}
-}
-
-// POST /api/universities/certificate-file/approve
-// @Tags universities
-// @Summary University approve a certificate file
-// @Description University approve a certificate file
-// @Accept json
-// @Produce json
-// @Param certificateFile body data.CertificateFileUpload true "Certificate file data"
-// @Success 201 {object} gin.H
-// @Failure 400 {object} gin.H
-// @Router /api/universities/certificate-file/approve [post]
-func ApproveCertificateFile(context *base.ApplicationContext) func(c *gin.Context) {
-	return func(c *gin.Context) {
-		var certificateFileUpload data.CertificateFileUpload
-		if err := c.ShouldBindJSON(&certificateFileUpload); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-
-		_, err := universities.SaveCertificateFile(context, &certificateFileUpload)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-		c.JSON(http.StatusCreated, gin.H{})
-	}
 }
 
 // POST /api/universities/register
@@ -211,6 +149,39 @@ func GetUniversityById(context *base.ApplicationContext) func(c *gin.Context) {
 }
 
 
+// POST /api/universities/certificate-file/request
+// @Tags universities
+// @Summary Student issue a certificate file
+// @Description Student issue a certificate file
+// @Accept json
+// @Produce json
+// @Param certificateFile body data.CertificateFileUpload true "Certificate file data"
+// @Success 201 {object} gin.H
+// @Failure 400 {object} gin.H
+// @Router /api/universities/certificate-file/request [post]
+func RequestCertificate(context *base.ApplicationContext) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		var certificateFileUpload data.CertificateFileUpload
+		if err := c.ShouldBindJSON(&certificateFileUpload); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		_, err := universities.SaveCertificateFile(context, &certificateFileUpload)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		c.JSON(http.StatusCreated, gin.H{})
+	}
+}
+
+
+
 // ApproveCertificate godoc
 // @Tags Certificates
 // @Summary Duyệt certificate lên blockchain
@@ -222,7 +193,7 @@ func GetUniversityById(context *base.ApplicationContext) func(c *gin.Context) {
 // @Failure 400 {object} gin.H
 // @Failure 404 {object} gin.H
 // @Failure 500 {object} gin.H
-// @Router /api/universities/certificates/approve [post]
+// @Router /api/universities/certificate-file/approve [post]
 func ApproveCertificate(context *base.ApplicationContext) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		var req data.BlockchainCertificateOutput
@@ -235,8 +206,17 @@ func ApproveCertificate(context *base.ApplicationContext) func(c *gin.Context) {
             return
         }
 
-		
+		_, err := universities.ApproveCertificateToBlockChain(context, &req)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"errors": err.Error(),
+			})
+			return
+		}
 
+		c.JSON(http.StatusCreated, gin.H{
+			"message": "Certificate approved succesfully",
+		})
 
 	}
 }

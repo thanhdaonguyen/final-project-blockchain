@@ -1,7 +1,26 @@
 definitions:
+  data.BlockchainCertificateOutput:
+    properties:
+      certHash:
+        type: string
+      certUUID:
+        type: string
+      dateOfIssuing:
+        type: string
+      studentPK:
+        type: string
+      studentSignature:
+        type: string
+      universityPK:
+        type: string
+      universitySignature:
+        type: string
+    type: object
   data.CertificateFileOutput:
     properties:
       cert_uuid:
+        type: string
+      date_of_issue:
         type: string
       is_on_chain:
         type: boolean
@@ -9,9 +28,13 @@ definitions:
         type: string
       student_public_key:
         type: string
+      student_signature:
+        type: string
       university_name:
         type: string
-      universityPublicKey:
+      university_public_key:
+        type: string
+      university_signature:
         type: string
     type: object
   data.CertificateFileUpload:
@@ -82,7 +105,7 @@ definitions:
     type: object
   data.StudentAuth:
     properties:
-      privateKey:
+      publicKey:
         type: string
     type: object
   data.StudentInput:
@@ -120,11 +143,17 @@ definitions:
     type: object
   data.UniversityInput:
     properties:
+      description:
+        type: string
       location:
         type: string
       name:
         type: string
       password:
+        type: string
+      privateKey:
+        type: string
+      publicKey:
         type: string
     type: object
   data.UniversityOutput:
@@ -142,6 +171,19 @@ definitions:
 info:
   contact: {}
 paths:
+  /api/blockchain/all-objects:
+    get:
+      description: Get all blockchain
+      produces:
+      - application/json
+      responses:
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Get all blockchain
+      tags:
+      - blockchain
   /api/countries:
     get:
       description: Get all countries
@@ -400,33 +442,41 @@ paths:
     post:
       consumes:
       - application/json
-      description: Add a certificate file
+      description: Duyệt một chứng chỉ và đưa lên blockchain
       parameters:
-      - description: Certificate file data
+      - description: Thông tin duyệt certificate
         in: body
-        name: certificateFile
+        name: input
         required: true
         schema:
-          $ref: '#/definitions/data.CertificateFileUpload'
+          $ref: '#/definitions/data.BlockchainCertificateOutput'
       produces:
       - application/json
       responses:
-        "201":
-          description: Created
+        "200":
+          description: OK
           schema:
             $ref: '#/definitions/gin.H'
         "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/gin.H'
-      summary: Add a certificate file
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Duyệt certificate lên blockchain
       tags:
-      - universities
+      - Certificates
   /api/universities/certificate-file/request:
     post:
       consumes:
       - application/json
-      description: Add a certificate file
+      description: Student issue a certificate file
       parameters:
       - description: Certificate file data
         in: body
@@ -445,7 +495,7 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/gin.H'
-      summary: Add a certificate file
+      summary: Student issue a certificate file
       tags:
       - universities
   /api/universities/certificates/not_on_chain:

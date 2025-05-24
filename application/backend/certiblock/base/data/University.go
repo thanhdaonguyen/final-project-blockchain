@@ -4,7 +4,12 @@ type UniversityInput struct {
 	Name   string    `json:"name"`
 	Password    string `json:"password"`
 	Location    string `json:"location"`
+	PrivateKey  string `json:"privateKey"`
+	PublicKey   string `json:"publicKey"`
+	Description string `json:"description"`
 }
+
+
 
 type UniversityOutput struct {
 	Name string `json:"name"`

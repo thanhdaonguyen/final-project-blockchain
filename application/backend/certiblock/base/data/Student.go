@@ -17,5 +17,9 @@ type StudentOutput struct {
 }
 
 type StudentAuth struct {
-	PrivateKey string `json:"privateKey"`
+	PublicKey string `json:"publicKey"`
+}
+
+type CertUUID struct {
+	CertUUID string `json:"certUUID"`
 }

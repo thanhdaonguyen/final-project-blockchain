@@ -1,6 +1,7 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { BACKEND_URL } from "@/utils/env";
 import {
     Button,
     Input,
@@ -45,65 +46,62 @@ const Verifier: React.FC = () => {
     const [isVerifying, setIsVerifying] = useState(false);
     const [fileName, setFileName] = useState<string | null>(null);
     const [isVerified, setIsVerified] = useState(false);
+    const [studentPublicKey, setStudentPublicKey] = useState<string | null>(
+        null
+    );
+    const [universityPublicKey, setUniversityPublicKey] = useState<
+        string | null
+    >(null);
+    const [universitySignature, setUniversitySignature] = useState<
+        string | null
+    >(null);
+    const [studentSignature, setStudentSignature] = useState<string | null>(
+        null
+    );
     // Information to check verification
     const [metaData, setMetaData] = useState<{ [key: string]: any }>({
         name: "John Doe",
         age: 30,
         university: "XYZ University",
     });
-    let studentPublicKey: string | null = null;
-    let studentPrivateKey: string | null = null;
-    let universityPublicKey: string | null = null;
-    let universityPrivateKey: string | null = null;
+    useEffect(() => {
+        if (!certUUID) return;
+        const fetchCertificateData = async () => {
+            try {
+                const response = await fetch(
+                    `${BACKEND_URL}/api/students/certificates/${certUUID}`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ certUUID }),
+                    }
+                );
+                if (!response.ok) {
+                    throw new Error("Failed to fetch certificate data");
+                }
+                const data = await response.json();
+                console.log("data:", data);
+                setMetaData({
+                    University: data.university_name,
+                    Date_Of_Issue: data.date_of_issue,
+                });
+                setStudentPublicKey(data.student_public_key);
+                setStudentSignature(data.student_signature);
+                setUniversityPublicKey(data.university_public_key);
+                setUniversitySignature(data.university_signature);
+            } catch (error) {
+                console.error("Error fetching certificate data:", error);
+            }
+        };
+        fetchCertificateData();
+    }, [certUUID]);
+
     let certHash,
         setCertHash: string | null = null;
-    let universitySignature: string | null = null;
-    let studentSignature: string | null = null;
 
-  // Verification logic
-  
-    const getVerificationDataFromDB = async () => {
-        // Simulate fetching data from the database
-        const studentKeys = await generateKey();
-        studentPublicKey = await exportKeyToString(studentKeys.publicKey);
-        studentPrivateKey = await exportKeyToString(studentKeys.privateKey);
-        const universityKeys = await generateKey();
-        universityPublicKey = await exportKeyToString(
-            universityKeys.publicKey
-        );
-        universityPrivateKey = await exportKeyToString(
-            universityKeys.privateKey
-        );
-        return {
-            studentPublicKey,
-            studentPrivateKey,
-            universityPublicKey,
-            universityPrivateKey,
-        };
-    };
-    const getVerificationDataFromBlockchain = async () => {
-        // Simulate fetching data from the blockchain
-        certHash =
-            "0xabcdef1234567890abcdef1234567890abcdef1234";
-        setMetaData({
-            name: "John Doe",
-            age: 30,
-            university: "XYZ University",
-        });
-        universitySignature = await signData(
-            universityPrivateKey as string,
-            uploadedFile
-        );
-        studentSignature = await signData(
-            studentPrivateKey as string,
-            uploadedFile
-        );
-        return {
-            certHash,
-            universitySignature,
-            studentSignature,
-        };
-    };
+    // Verification logic
 
     const handleVerify = async (): Promise<void> => {
         if (!uploadedFile) {
@@ -115,26 +113,14 @@ const Verifier: React.FC = () => {
         // + studentPublicKey
         // + universityPublicKey
 
-        // simulate fetching data from the database
-        const {
-            studentPublicKey,
-            studentPrivateKey,
-            universityPublicKey,
-            universityPrivateKey,
-        } = await getVerificationDataFromDB();
-
-        // Here I need to query the blockchain to get:  
+        // Here I need to query the blockchain to get:
         // + certHash
         // + metadata
         // + universitySignature
         // + studentSignature
 
         // simulate fetching data from the blockchain
-        const {
-            certHash,
-            universitySignature,
-            studentSignature,
-        } = await getVerificationDataFromBlockchain();
+        certHash = "hahaha";
 
         let verifyUniversitySignatureResult = await verifySignature(
             universityPublicKey as string,
@@ -146,12 +132,12 @@ const Verifier: React.FC = () => {
             studentSignature as string,
             uploadedFile as string
         );
-        let verifyHashResult = true
+        let verifyHashResult = true;
         // let verifyHashResult = await isCorrectHash(
         //     certHash as string,
         //     uploadedFile as string
         // );
-      
+
         console.log("Hash verification result: ", verifyHashResult);
         console.log(
             "University signature verification result: ",
@@ -161,7 +147,10 @@ const Verifier: React.FC = () => {
             "Student signature verification result: ",
             verifyStudentSignatureResult
         );
-        let result = verifyHashResult && verifyUniversitySignatureResult && verifyStudentSignatureResult;
+        let result =
+            verifyHashResult &&
+            verifyUniversitySignatureResult &&
+            verifyStudentSignatureResult;
         if (result) {
             setIsVerifying(false);
             setIsVerified(true);

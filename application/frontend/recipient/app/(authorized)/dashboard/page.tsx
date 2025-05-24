@@ -7,6 +7,8 @@ import {
     Table,
     Typography,
     Input,
+    Card,
+    Divider,
     notification,
 } from "antd";
 import { BACKEND_URL } from "@/utils/env";
@@ -23,12 +25,22 @@ interface Certificate {
     studentPublicKey: string;
     universityPublicKey: string;
     dateOfIssuing: string;
+    universitySignature: string;
+    studentSignature: string;
+    plainTextFileData: string;
+    universityName: string;
 }
 
 const Dashboard: React.FC = () => {
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(true);
-    const [selectedCertificate, setSelectedCertificate] = useState<Certificate | null>(null);
-    const [searchQuery, setSearchQuery] = useState<string>("");
+    const [isModalShareOpen, setIsModalShareOpen] = useState<boolean>(true);
+    const [isCheckModalOpen, setIsModalCheckOpen] = useState<boolean>(false);
+    const [selectedCheckCertificate, setSelectedCheckCertificate] =
+        useState<Certificate | null>(null);
+    const [selectedCheckFileData, setSelectedCheckFileData] =
+        useState<string | null>(null);
+    const [universityName, setUniversityName] = useState<string | null>(null);
+    const [selectedShareCertificate, setSelectedShareCertificate] =
+        useState<Certificate | null>(null);
     const [loginData, setLoginData] = useState<any>(JSON.parse("{}")); // State to store login data
     // Safely retrieve login data from localStorage on the client side
     useEffect(() => {
@@ -57,54 +69,31 @@ const Dashboard: React.FC = () => {
             return;
         }
 
-        if (searchQuery) {
-            fetch(`${BACKEND_URL}/api/students/certificates/${searchQuery}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    privateKey: loginData.privateKey,
-                }),
+        const base64PublicKeyString = btoa(loginData.publicKey);
+        console.log("base64PublicKeyString", base64PublicKeyString);
+        fetch(`${BACKEND_URL}/api/students/certificates`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                publicKey: base64PublicKeyString,
+            }),
+        })
+            .then(async (res) => {
+                if (!res.ok) {
+                    throw new Error("Failed to fetch data");
+                }
+                const data = await res.json();
+                setCertificates(data);
             })
-                .then(async (res) => {
-                    const data = await res.json();
-                    // console.log("Response body:", data);
-
-                    if (!res.ok) {
-                        throw new Error("Failed to fetch data");
-                    }
-
-                    setCertificates([data, data]);
-                })
-                .catch((e) => {
-                    console.log(e);
+            .catch((e) => {
+                notification.error({
+                    message: "Error",
+                    description: e.message,
                 });
-        } else {
-            fetch(`${BACKEND_URL}/api/students/certificates`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    privateKey: loginData.privateKey,
-                }),
-            })
-                .then(async (res) => {
-                    if (!res.ok) {
-                        throw new Error("Failed to fetch data");
-                    }
-                    const data = await res.json();
-                    setCertificates(data);
-                })
-                .catch((e) => {
-                    notification.error({
-                        message: "Error",
-                        description: e.message,
-                    });
-                });
-        }
-    }, [searchQuery, loginData, setCertificates]);
+            });
+    }, [loginData, setCertificates]);
 
     useEffect(() => {
         if (loginData.isAuthenticated) {
@@ -121,45 +110,42 @@ const Dashboard: React.FC = () => {
             width: 30,
         },
         {
-            title: "Hash",
-            dataIndex: "certHash",
-            key: "certHash",
-            width: 200,
-        },
-        {
             title: "Issue Date",
             dataIndex: "dateOfIssuing",
             key: "dateOfIssuing",
             width: 30,
         },
         {
-            title: "University Public Key",
-            dataIndex: "universityPublicKey",
-            key: "universityPublicKey",
-            width: 200,
-        },
-        {
-            title: "Action",
-            key: "action",
+            title: "Check Cert",
+            key: "action1",
             width: 20,
             render: (text: any, record: Certificate) => (
-                <Button type="primary" onClick={() => handleDownload(record)}>
-                    Download
+                <Button type="primary" onClick={() => handleCheckCert(record)}>
+                    Check
+                </Button>
+            ),
+        },
+        {
+            title: "Share Cert",
+            key: "action2",
+            width: 20,
+            render: (text: any, record: Certificate) => (
+                <Button type="primary" onClick={() => handleShare(record)}>
+                    Share
                 </Button>
             ),
         },
     ];
 
-    const handleDownload = (certificate: Certificate): void => {
-        if (!loginData.isAuthenticated) {
-            notification.error({
-                message: "Error",
-                description: "You are not authenticated",
-            });
-            return;
-        }
+    const handleShare = (certificate: Certificate): void => {
+        setSelectedShareCertificate(certificate);
+        setIsModalShareOpen(true);
+        console.log("certificate", certificate);
+        console.log("selectedShareCertificate", selectedShareCertificate);
+    };
 
-        fetch(
+    const handleCheckCert = async (certificate: Certificate): Promise<void> => {
+        await fetch(
             `${BACKEND_URL}/api/students/certificates/${certificate.certUUID}`,
             {
                 method: "POST",
@@ -167,41 +153,36 @@ const Dashboard: React.FC = () => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    privateKey: loginData.privateKey,
+                    publicKey: certificate.studentPublicKey,
                 }),
             }
-        )
-            .then(async (res) => {
-                if (!res.ok) {
-                    throw new Error("Failed to fetch data");
-                }
-                const data = await res.json();
-                const arrayBuffer = base64Decode(data.base64File);
-                console.log("base64File", data.base64File);
-                console.log("arrayBuffer", arrayBuffer);
-                const blob = new Blob([arrayBuffer], {
-                    type: "application/octet-stream",
-                });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `${certificate.certUUID}.txt`;
-                a.click();
-            })
-            .catch((e) => {
-                notification.error({
-                    message: "Error",
-                    description: e.message,
-                });
-            });
+        ).then(async (res) => {
+            if (!res.ok) {
+                throw new Error("Failed to fetch data");
+            }
+            const data = await res.json();
+            console.log("data", data);
+            setSelectedCheckFileData(data.plain_text_file_data);
+            setUniversityName(data.university_name);
+        });
+        
+        setSelectedCheckCertificate(certificate);
+        setIsModalCheckOpen(true);
     };
 
     const handleOk = (): void => {
-        setIsModalOpen(false);
+        setIsModalShareOpen(false);
     };
 
     const handleCancel = (): void => {
-        setIsModalOpen(false);
+        setIsModalShareOpen(false);
+    };
+
+    const handleCheckModalOpen = (): void => {
+        setIsModalCheckOpen(true);
+    };
+    const handleCheckModalClose = (): void => {
+        setIsModalCheckOpen(false);
     };
 
     return (
@@ -211,31 +192,6 @@ const Dashboard: React.FC = () => {
                     ? loginData.fullName
                     : "Unauthenticated"}
             </Title>
-            <Title level={4}>
-                {"Public Key: " +
-                    (loginData.isAuthenticated
-                        ? loginData.publicKey
-                        : "Unauthorized")}
-            </Title>
-
-            <Title level={4}>
-                {"Private Key: " +
-                    (loginData.isAuthenticated
-                        ? loginData.privateKey
-                        : "Unauthorized")}
-            </Title>
-
-            {/* Search Input */}
-            <Search
-                placeholder="Search by Certificate ID"
-                onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    console.log("searchQuery", searchQuery);
-                }}
-                style={{ marginBottom: "20px", width: "100%" }}
-                // onSearch={(value) => {reloadCertificates()}}
-            />
-
             <Button
                 type="primary"
                 style={{ marginBottom: "20px" }}
@@ -255,11 +211,11 @@ const Dashboard: React.FC = () => {
                 scroll={{ x: "max-content" }} // Enable horizontal scrolling
             />
 
-            {/* {selectedCertificate && ( */}
+            {/* {selectedShareCertificate && ( */}
             {true && (
                 <Modal
                     title="Share Certificate"
-                    open={isModalOpen}
+                    open={isModalShareOpen}
                     onOk={handleOk}
                     onCancel={handleCancel}
                     footer={[
@@ -269,8 +225,8 @@ const Dashboard: React.FC = () => {
                     ]}
                 >
                     <QRCode
-                        // value={`https://example.com/certificate/${selectedCertificate.certUUID}`}
-                        value={`https://example.com/certificate/hihi`}
+                        // value={`https://example.com/certificate/${selectedShareCertificate.certUUID}`}
+                        value={`localhost:3002/?certUUID=${selectedShareCertificate?.certUUID}`}
                     />
                     <div
                         style={{
@@ -280,13 +236,80 @@ const Dashboard: React.FC = () => {
                         }}
                     >
                         <Text copyable>
-                            https://verify.com/
+                            localhost:3002/?certUUID=
                             {/* {certificates[1].certUUID} */}
-                            {/* {selectedCertificate.certificateId} */}
+                            {selectedShareCertificate?.certUUID}
                         </Text>
                     </div>
                 </Modal>
             )}
+
+            <Modal
+                title={
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                        <span>Check Certificate File</span>
+                    </div>
+                }
+                open={isCheckModalOpen}
+                onCancel={handleCheckModalClose}
+                width={700}
+                style={{ top: 20 }}
+                footer={[
+                    <Button
+                        key="close"
+                        onClick={handleCheckModalClose}
+                        size="large"
+                    >
+                        Close
+                    </Button>,
+                ]}
+            >
+                <Divider />
+
+                <Card
+                    title="Certificate Details"
+                    style={{ marginBottom: "20px", borderRadius: "6px" }}
+                >
+                    <pre
+                        style={{
+                            whiteSpace: "pre-wrap",
+                            wordWrap: "break-word",
+                            background: "#f5f5f5",
+                            padding: "16px",
+                            borderRadius: "6px",
+                            maxHeight: "400px",
+                            overflow: "auto",
+                            border: "1px solid #e8e8e8",
+                        }}
+                    >
+                        Certificate ID: {selectedCheckCertificate?.certUUID}
+                        {"\n"}
+                        Date of Issue: {selectedCheckCertificate?.dateOfIssuing}
+                        {"\n"}
+                        University Name: {universityName}
+                    </pre>
+                </Card>
+
+                <Card
+                    title="Certificate Details"
+                    style={{ marginBottom: "20px", borderRadius: "6px" }}
+                >
+                    <pre
+                        style={{
+                            whiteSpace: "pre-wrap",
+                            wordWrap: "break-word",
+                            background: "#f5f5f5",
+                            padding: "16px",
+                            borderRadius: "6px",
+                            maxHeight: "400px",
+                            overflow: "auto",
+                            border: "1px solid #e8e8e8",
+                        }}
+                    >
+                        {selectedCheckFileData}
+                    </pre>
+                </Card>
+            </Modal>
         </div>
     );
 };

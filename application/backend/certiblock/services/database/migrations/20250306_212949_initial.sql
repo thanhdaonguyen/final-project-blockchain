@@ -20,9 +20,11 @@ CREATE TABLE IF NOT EXISTS students (
 CREATE TABLE IF NOT EXISTS universities(
     id INT PRIMARY KEY AUTO_INCREMENT,
     name_university TEXT NOT NULL,
+    password TEXT NOT NULL,
     public_key LONGTEXT NOT NULL,
     private_key LONGTEXT NOT NULL,
     location_university LONGTEXT NOT NULL,
+    description_university LONGTEXT NOT NULL,
 
     KEY idx_university_pubkey (public_key(16))
 

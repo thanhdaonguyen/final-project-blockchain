@@ -11,6 +11,7 @@ import {
 import Link from 'next/link';
 import { BACKEND_URL } from '@/utils/env';
 import { useRouter } from 'next/navigation';
+import { generateKey, exportKeyToString } from './cryptoTools'
 
 const { Title, Text } = Typography;
 
@@ -61,14 +62,27 @@ const Register: React.FC = () => {
   const router = useRouter();
 
   const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
+
+    let { privateKey, publicKey } = await generateKey();
+    const privateKeyString = await exportKeyToString(privateKey);
+    const publicKeyString = await exportKeyToString(publicKey);
+
     console.log('Received values of form: ', values);
+    const requestBody = {
+      name: values.nameUniversity,
+      password: values.password,
+      location: values.location,
+      description: "University",
+      publicKey: publicKeyString,
+      privateKey: privateKeyString,
+    };
     console.log('BACKEND_URL =', BACKEND_URL);
     const res = await fetch(`${BACKEND_URL}/api/universities/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(values),
+      body: JSON.stringify(requestBody),
     });
     const data = await res.json();
     if (res.status !== 200 && res.status !== 201) {
@@ -106,7 +120,7 @@ const Register: React.FC = () => {
           scrollToFirstError
         >
           <Form.Item
-            name="name"
+            name="nameUniversity"
             label="University's Name"
             rules={[
               {

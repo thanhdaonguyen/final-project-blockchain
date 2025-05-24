@@ -15,6 +15,26 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/blockchain/all-objects": {
+            "get": {
+                "description": "Get all blockchain",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "blockchain"
+                ],
+                "summary": "Get all blockchain",
+                "responses": {
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    }
+                }
+            }
+        },
         "/api/countries": {
             "get": {
                 "description": "Get all countries",
@@ -364,7 +384,7 @@ const docTemplate = `{
         },
         "/api/universities/certificate-file/approve": {
             "post": {
-                "description": "Add a certificate file",
+                "description": "Duyệt một chứng chỉ và đưa lên blockchain",
                 "consumes": [
                     "application/json"
                 ],
@@ -372,23 +392,23 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "universities"
+                    "Certificates"
                 ],
-                "summary": "Add a certificate file",
+                "summary": "Duyệt certificate lên blockchain",
                 "parameters": [
                     {
-                        "description": "Certificate file data",
-                        "name": "certificateFile",
+                        "description": "Thông tin duyệt certificate",
+                        "name": "input",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/data.CertificateFileUpload"
+                            "$ref": "#/definitions/data.BlockchainCertificateOutput"
                         }
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created",
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/gin.H"
                         }
@@ -398,13 +418,25 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/gin.H"
                         }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
                     }
                 }
             }
         },
         "/api/universities/certificate-file/request": {
             "post": {
-                "description": "Add a certificate file",
+                "description": "Student issue a certificate file",
                 "consumes": [
                     "application/json"
                 ],
@@ -414,7 +446,7 @@ const docTemplate = `{
                 "tags": [
                     "universities"
                 ],
-                "summary": "Add a certificate file",
+                "summary": "Student issue a certificate file",
                 "parameters": [
                     {
                         "description": "Certificate file data",
@@ -583,10 +615,39 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "data.BlockchainCertificateOutput": {
+            "type": "object",
+            "properties": {
+                "certHash": {
+                    "type": "string"
+                },
+                "certUUID": {
+                    "type": "string"
+                },
+                "dateOfIssuing": {
+                    "type": "string"
+                },
+                "studentPK": {
+                    "type": "string"
+                },
+                "studentSignature": {
+                    "type": "string"
+                },
+                "universityPK": {
+                    "type": "string"
+                },
+                "universitySignature": {
+                    "type": "string"
+                }
+            }
+        },
         "data.CertificateFileOutput": {
             "type": "object",
             "properties": {
                 "cert_uuid": {
+                    "type": "string"
+                },
+                "date_of_issue": {
                     "type": "string"
                 },
                 "is_on_chain": {
@@ -598,10 +659,16 @@ const docTemplate = `{
                 "student_public_key": {
                     "type": "string"
                 },
-                "universityPublicKey": {
+                "student_signature": {
                     "type": "string"
                 },
                 "university_name": {
+                    "type": "string"
+                },
+                "university_public_key": {
+                    "type": "string"
+                },
+                "university_signature": {
                     "type": "string"
                 }
             }
@@ -711,7 +778,7 @@ const docTemplate = `{
         "data.StudentAuth": {
             "type": "object",
             "properties": {
-                "privateKey": {
+                "publicKey": {
                     "type": "string"
                 }
             }
@@ -770,6 +837,9 @@ const docTemplate = `{
         "data.UniversityInput": {
             "type": "object",
             "properties": {
+                "description": {
+                    "type": "string"
+                },
                 "location": {
                     "type": "string"
                 },
@@ -777,6 +847,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                },
+                "privateKey": {
+                    "type": "string"
+                },
+                "publicKey": {
                     "type": "string"
                 }
             }
